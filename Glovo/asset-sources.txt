@@ -1,0 +1,28 @@
+Glovo Kenya event game asset sources
+
+Downloaded on 2026-05-06 from public Glovo web properties approved by the project owner for this event build.
+
+Brand and logo assets:
+https://sell.glovoapp.com/ke/wp-content/themes/glovosales/theme/img/logo-glovo-local.png
+https://sell.glovoapp.com/ke/wp-content/themes/glovosales/theme/img/logo-glovo-local-white.png
+
+Service/category imagery:
+https://sell.glovoapp.com/ug/wp-content/uploads/sites/26/2022/11/delivery_with_glovo-314x300.png
+https://sell.glovoapp.com/ug/wp-content/uploads/sites/26/2022/11/self_delivery.png
+https://sell.glovoapp.com/ug/wp-content/uploads/sites/26/2022/11/pick-up-203x300.png
+https://sell.glovoapp.com/ug/wp-content/uploads/sites/26/2022/11/manage_your_store-428x300.png
+https://sell.glovoapp.com/ug/wp-content/uploads/sites/26/2022/11/promotions-326x300.png
+https://sell.glovoapp.com/ug/wp-content/uploads/sites/26/2022/11/ads-365x300.png
+https://sell.glovoapp.com/ug/wp-content/uploads/sites/26/2022/11/menu_optimisation.png
+https://sell-stage-dcfa19ff.s3.eu-west-1.amazonaws.com/wp-content/uploads/sites/35/2023/06/15131729/top-performers.png
+
+Glovo Kenya context references:
+https://glovoapp.com/KE/en/nairobi
+https://sell.glovoapp.com/ke/en/services/delivery-with-glovo/
+
+Social/context reference:
+Glovo LinkedIn post about Glovo Brands Day in Kenya, used for adult-level corporate question context.
+https://www.linkedin.com/posts/glovo-app_glovo-brands-day-in-kenya-brought-together-activity-7393943471323234304-2JBF
+
+Note:
+LinkedIn exposed the post text publicly, but the individual post image files were not directly downloadable without sign-in during implementation. The app remains image-fallback safe and can accept additional approved social images in assets/images later.

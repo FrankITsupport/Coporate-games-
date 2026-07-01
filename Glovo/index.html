@@ -1,0 +1,2307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glovo Kenya Event Games</title>
+<style>
+  :root {
+    --yellow: #ffc244;
+    --green: #00a082;
+    --ink: #121212;
+    --muted: #5f615d;
+    --paper: #fff8e8;
+    --white: #ffffff;
+    --line: rgba(18, 18, 18, 0.14);
+    --shadow: 0 18px 60px rgba(18, 18, 18, 0.18);
+  }
+
+  * { box-sizing: border-box; }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    background: var(--yellow);
+    color: var(--ink);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  .app {
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 22% 18%, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0) 34%),
+      linear-gradient(128deg, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0) 36%),
+      linear-gradient(172deg, rgba(0, 160, 130, 0.20), rgba(0, 160, 130, 0) 48%),
+      var(--yellow);
+  }
+
+  .app::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.04) 60%);
+  }
+
+  .topbar {
+    height: 76px;
+    padding: 14px clamp(16px, 4vw, 48px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    position: relative;
+    z-index: 10;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0));
+    backdrop-filter: blur(10px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .brand img {
+    height: 42px;
+    max-width: 150px;
+    object-fit: contain;
+  }
+
+  .brand-copy {
+    display: grid;
+    gap: 2px;
+  }
+
+  .brand-copy strong {
+    font-size: clamp(18px, 2.3vw, 28px);
+    line-height: 1;
+  }
+
+  .brand-copy span {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(18, 18, 18, 0.66);
+  }
+
+  .nav-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .icon-btn,
+  .primary-btn,
+  .ghost-btn,
+  .category-btn,
+  .choice-btn {
+    border: 0;
+    border-radius: 8px;
+    min-height: 46px;
+    cursor: pointer;
+    font-weight: 900;
+    letter-spacing: 0;
+    box-shadow: 0 5px 0 rgba(18, 18, 18, 0.18);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  }
+
+  .icon-btn:active,
+  .primary-btn:active,
+  .ghost-btn:active,
+  .category-btn:active,
+  .choice-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 rgba(18, 18, 18, 0.18);
+  }
+
+  .icon-btn {
+    width: 50px;
+    background: var(--white);
+    display: grid;
+    place-items: center;
+    font-size: 21px;
+  }
+
+  .primary-btn {
+    background: var(--green);
+    color: var(--white);
+    padding: 0 22px;
+  }
+
+  .ghost-btn {
+    background: var(--white);
+    padding: 0 18px;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 76px 0 0;
+    padding: clamp(14px, 2.5vw, 34px) clamp(16px, 4vw, 52px) clamp(16px, 3vw, 42px);
+    display: none;
+    z-index: 1;
+  }
+
+  .screen.active {
+    display: block;
+  }
+
+  .hub {
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(280px, 0.82fr) minmax(420px, 1.42fr);
+    gap: clamp(28px, 4.6vw, 68px);
+    align-items: center;
+  }
+
+  .hero {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero h1 {
+    margin: 0;
+    max-width: 780px;
+    font-size: clamp(56px, 8.3vw, 126px);
+    line-height: 0.86;
+    letter-spacing: 0;
+    text-shadow: 0 16px 34px rgba(18, 18, 18, 0.14);
+  }
+
+  .hero p {
+    margin: 22px 0 0;
+    max-width: 560px;
+    font-size: clamp(17px, 2vw, 25px);
+    line-height: 1.32;
+    font-weight: 800;
+    color: rgba(18, 18, 18, 0.78);
+  }
+
+  .city-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 26px;
+  }
+
+  .pill {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(18, 18, 18, 0.1);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .game-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(16px, 2vw, 24px);
+    perspective: 1200px;
+  }
+
+  .game-card {
+    min-height: 206px;
+    padding: clamp(10px, 1.6vw, 18px);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    cursor: pointer;
+    text-align: left;
+    display: grid;
+    grid-template-columns: 104px 1fr;
+    align-items: center;
+    gap: clamp(16px, 2vw, 22px);
+    position: relative;
+    overflow: visible;
+    backdrop-filter: none;
+    transform: translateZ(0);
+    transition: transform 0.22s ease;
+  }
+
+  .game-card:hover {
+    transform: translateY(-8px) scale(1.012);
+  }
+
+  .game-card.featured {
+    min-height: 206px;
+    grid-template-columns: 104px 1fr;
+    background: transparent;
+    color: var(--ink);
+  }
+
+  .game-card h2 {
+    margin: 0;
+    font-size: clamp(24px, 3.2vw, 46px);
+    line-height: 0.96;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 12px 28px rgba(18, 18, 18, 0.16);
+  }
+
+  .game-card p {
+    margin: 10px 0 0;
+    font-size: clamp(14px, 1.4vw, 17px);
+    line-height: 1.34;
+    font-weight: 800;
+    color: inherit;
+    opacity: 0.72;
+    position: relative;
+    z-index: 1;
+  }
+
+  .game-icon {
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.62)),
+      var(--yellow);
+    display: grid;
+    place-items: center;
+    position: relative;
+    z-index: 1;
+    box-shadow:
+      0 20px 34px rgba(18, 18, 18, 0.20),
+      0 0 0 8px rgba(255, 255, 255, 0.28),
+      inset 0 2px 0 rgba(255, 255, 255, 0.86);
+  }
+
+  .featured .game-icon {
+    width: 104px;
+    height: 104px;
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.74)),
+      var(--yellow);
+    box-shadow:
+      0 26px 42px rgba(0, 0, 0, 0.24),
+      0 0 0 10px rgba(255, 255, 255, 0.20),
+      inset 0 2px 0 rgba(255, 255, 255, 0.90);
+  }
+
+  .game-icon img {
+    width: 76%;
+    height: 76%;
+    object-fit: contain;
+    filter: drop-shadow(0 9px 10px rgba(18, 18, 18, 0.16));
+  }
+
+  .game-copy {
+    min-width: 0;
+  }
+
+  .game-shell {
+    height: 100%;
+    display: grid;
+    gap: 18px;
+    grid-template-rows: auto 1fr;
+  }
+
+  .game-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 18px;
+  }
+
+  .game-heading h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 68px);
+    line-height: 0.95;
+  }
+
+  .score-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .stat {
+    min-width: 104px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: transparent;
+    border: 0;
+    text-align: center;
+    font-weight: 900;
+  }
+
+  .stat span {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .play-area {
+    min-height: 0;
+    border-radius: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    overflow: visible;
+    position: relative;
+  }
+
+  .wheel-layout {
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(310px, 1fr) minmax(300px, 0.76fr);
+    gap: clamp(14px, 3vw, 32px);
+    align-items: center;
+    padding: clamp(16px, 3vw, 34px);
+  }
+
+  .wheel-stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 0;
+  }
+
+  .pointer {
+    position: absolute;
+    top: max(2px, 2%);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 26px solid transparent;
+    border-right: 26px solid transparent;
+    border-top: 52px solid var(--ink);
+    z-index: 3;
+    filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.18));
+  }
+
+  #wheelCanvas {
+    width: min(66vh, 72vw, 640px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    filter: drop-shadow(0 22px 28px rgba(18, 18, 18, 0.2));
+  }
+
+  .wheel-panel {
+    display: grid;
+    gap: 14px;
+    align-content: center;
+  }
+
+  .result-tile {
+    min-height: 220px;
+    border-radius: 8px;
+    border: 0;
+    background: transparent;
+    padding: 16px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .result-tile img {
+    max-width: 100%;
+    max-height: 148px;
+    object-fit: contain;
+  }
+
+  .result-tile strong {
+    display: block;
+    margin-top: 10px;
+    font-size: clamp(24px, 3vw, 42px);
+    line-height: 1;
+  }
+
+  .rush-layout {
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(280px, 0.8fr) minmax(360px, 1.2fr);
+    gap: 18px;
+    padding: clamp(14px, 2.6vw, 30px);
+  }
+
+  .order-card {
+    min-height: 280px;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 14px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .order-card img {
+    max-width: min(220px, 70%);
+    max-height: 160px;
+    object-fit: contain;
+  }
+
+  .order-card h2 {
+    margin: 0;
+    font-size: clamp(28px, 4.4vw, 58px);
+    line-height: 0.95;
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-content: center;
+  }
+
+  .category-btn {
+    min-height: 92px;
+    padding: 14px;
+    background: var(--green);
+    color: var(--white);
+    font-size: clamp(18px, 2.2vw, 27px);
+    box-shadow:
+      0 14px 28px rgba(18, 18, 18, 0.18),
+      0 5px 0 rgba(18, 18, 18, 0.18);
+  }
+
+  .category-btn:nth-child(even) {
+    background: var(--ink);
+  }
+
+  .toast {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--white);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-weight: 900;
+    opacity: 0;
+    transition: 0.2s ease;
+    z-index: 20;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .deliver-layout {
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(220px, 0.42fr);
+    gap: 18px;
+    padding: clamp(14px, 2.6vw, 30px);
+  }
+
+  .city-board {
+    --size: min(68vh, 68vw, 620px);
+    width: var(--size);
+    height: var(--size);
+    justify-self: center;
+    align-self: center;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 6px;
+    filter: drop-shadow(0 28px 36px rgba(18, 18, 18, 0.22));
+  }
+
+  .cell {
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(18, 18, 18, 0.12);
+    display: grid;
+    place-items: center;
+    font-size: clamp(18px, 3.2vw, 34px);
+    font-weight: 900;
+  }
+
+  .cell.block { background: rgba(18, 18, 18, 0.78); color: var(--white); }
+  .cell.drop { background: var(--green); color: var(--white); }
+  .cell.rider { background: var(--yellow); border: 4px solid var(--green); }
+
+  .control-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 64px);
+    grid-template-rows: repeat(3, 64px);
+    gap: 8px;
+    justify-content: center;
+    align-content: center;
+  }
+
+  .control-pad button {
+    border: 0;
+    border-radius: 8px;
+    background: var(--white);
+    box-shadow: 0 5px 0 rgba(18, 18, 18, 0.18);
+    font-size: 24px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .memory-board {
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(82px, 1fr));
+    grid-auto-rows: 1fr;
+    gap: 12px;
+    padding: clamp(14px, 2.4vw, 28px);
+    align-content: center;
+    filter: drop-shadow(0 24px 34px rgba(18, 18, 18, 0.18));
+  }
+
+  .memory-card {
+    border: 0;
+    border-radius: 8px;
+    background: var(--yellow);
+    box-shadow: 0 6px 0 rgba(18, 18, 18, 0.18);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    min-height: 0;
+    padding: clamp(8px, 1.2vw, 14px);
+    overflow: hidden;
+  }
+
+  .memory-card.open,
+  .memory-card.matched {
+    background: var(--white);
+  }
+
+  .memory-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: none;
+    min-width: 0;
+    min-height: 0;
+    pointer-events: none;
+  }
+
+  .memory-card.open img,
+  .memory-card.matched img {
+    display: block;
+  }
+
+  .memory-back {
+    display: grid;
+    place-items: center;
+    width: 84%;
+    height: 42%;
+  }
+
+  .memory-back svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .memory-card.open .memory-back,
+  .memory-card.matched .memory-back {
+    display: none;
+  }
+
+  .puzzle-layout {
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(260px, 0.48fr);
+    gap: 18px;
+    padding: clamp(14px, 2.6vw, 30px);
+  }
+
+  .puzzle-board {
+    --size: min(68vh, 68vw, 620px);
+    width: var(--size);
+    height: var(--size);
+    justify-self: center;
+    align-self: center;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 6px;
+    background: var(--green);
+    padding: 6px;
+    border-radius: 8px;
+    box-shadow: 0 28px 42px rgba(18, 18, 18, 0.22);
+  }
+
+  .puzzle-tile {
+    border: 0;
+    border-radius: 6px;
+    background-color: var(--white);
+    background-image: var(--puzzle-image);
+    background-size: 300% 300%;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgba(18, 18, 18, 0.08);
+  }
+
+  .puzzle-tile.selected {
+    outline: 5px solid var(--ink);
+    z-index: 2;
+  }
+
+  .duel-layout {
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(240px, 0.45fr) minmax(360px, 1fr) minmax(240px, 0.45fr);
+    gap: 18px;
+    padding: clamp(14px, 2.6vw, 30px);
+    align-items: stretch;
+  }
+
+  .team-panel {
+    border-radius: 8px;
+    background: transparent;
+    border: 0;
+    padding: 18px;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .team-panel img {
+    width: min(170px, 72%);
+    aspect-ratio: 1;
+    object-fit: contain;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: 0 22px 34px rgba(18, 18, 18, 0.16);
+    padding: 0;
+  }
+
+  .team-panel h2 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 56px);
+    line-height: 0.94;
+  }
+
+  .arena {
+    min-width: 0;
+    border-radius: 8px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: clamp(16px, 2.6vw, 30px);
+    display: grid;
+    gap: 16px;
+    align-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .question-box {
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink);
+    padding: 0;
+    text-align: center;
+    box-shadow: none;
+  }
+
+  .question-box span {
+    display: block;
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .question-box h2 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 58px);
+    line-height: 1.05;
+    text-shadow: 0 12px 26px rgba(18, 18, 18, 0.14);
+  }
+
+  .choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .choice-btn {
+    min-height: 70px;
+    background: var(--white);
+    padding: 12px;
+    font-size: clamp(17px, 2vw, 24px);
+  }
+
+  .battle-track {
+    height: 116px;
+    border-radius: 999px;
+    background:
+      linear-gradient(90deg, rgba(0, 160, 130, 0.18), rgba(255, 255, 255, 0.72), rgba(255, 194, 68, 0.34));
+    border: 3px solid rgba(18, 18, 18, 0.14);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .middle-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 4px;
+    background: rgba(18, 18, 18, 0.36);
+  }
+
+  .marker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--white);
+    box-shadow: 0 18px 34px rgba(18, 18, 18, 0.2);
+    display: grid;
+    place-items: center;
+    transition: left 0.28s ease;
+    padding: 12px;
+  }
+
+  .marker img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .bag-arena {
+    min-height: 220px;
+    border-radius: 8px;
+    background: transparent;
+    border: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .fall-item {
+    position: absolute;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--white);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 14px 24px rgba(18, 18, 18, 0.18);
+    transition: top 0.25s ease;
+    font-size: 13px;
+    font-weight: 900;
+    text-align: center;
+    padding: 8px;
+  }
+
+  .bag-score-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .side-panel {
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    padding: 18px;
+    display: grid;
+    gap: 14px;
+    align-content: center;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .side-panel h2 {
+    margin: 0;
+    font-size: clamp(24px, 3vw, 40px);
+    line-height: 1;
+  }
+
+  .side-panel p {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 800;
+    line-height: 1.35;
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(18, 18, 18, 0.62);
+    display: none;
+    place-items: center;
+    padding: 22px;
+    z-index: 50;
+  }
+
+  .overlay.show {
+    display: grid;
+  }
+
+  .modal {
+    width: min(560px, 94vw);
+    background: var(--white);
+    border-radius: 8px;
+    padding: clamp(20px, 4vw, 34px);
+    text-align: center;
+    box-shadow: var(--shadow);
+    display: grid;
+    gap: 16px;
+  }
+
+  .modal img {
+    max-width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+    margin: auto;
+  }
+
+  .modal h2 {
+    margin: 0;
+    font-size: clamp(34px, 7vw, 68px);
+    line-height: 0.94;
+  }
+
+  .modal p {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 800;
+  }
+
+  .settings-modal {
+    text-align: left;
+    width: min(640px, 94vw);
+  }
+
+  .settings-modal h2 {
+    text-align: left;
+  }
+
+  .setting-row {
+    display: grid;
+    gap: 8px;
+  }
+
+  .setting-row label {
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .setting-row select {
+    min-height: 52px;
+    border: 2px solid rgba(18, 18, 18, 0.16);
+    border-radius: 8px;
+    padding: 0 14px;
+    font: inherit;
+    font-weight: 900;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .difficulty-note {
+    border-radius: 8px;
+    background: rgba(255, 194, 68, 0.28);
+    border: 1px solid rgba(18, 18, 18, 0.12);
+    padding: 14px;
+    color: var(--ink);
+    font-weight: 800;
+    line-height: 1.38;
+  }
+
+  #confetti {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 80;
+  }
+
+  @media (max-width: 900px) {
+    body { overflow: auto; }
+    .app { min-height: 100svh; overflow: visible; }
+    .topbar { height: auto; align-items: flex-start; }
+    .brand-copy span { display: none; }
+    .screen { position: static; min-height: calc(100svh - 76px); }
+    .hub,
+    .wheel-layout,
+    .rush-layout,
+    .deliver-layout,
+    .puzzle-layout,
+    .duel-layout {
+      grid-template-columns: 1fr;
+    }
+    .game-grid { grid-template-columns: 1fr; }
+    .game-card,
+    .game-card.featured {
+      grid-template-columns: 86px 1fr;
+      min-height: 150px;
+    }
+    .game-icon,
+    .featured .game-icon {
+      width: 86px;
+      height: 86px;
+    }
+    .game-heading { align-items: flex-start; flex-direction: column; }
+    .score-row { justify-content: flex-start; }
+    .city-board,
+    .puzzle-board { --size: min(88vw, 520px); }
+    .memory-board { grid-template-columns: repeat(4, minmax(62px, 1fr)); }
+    #wheelCanvas { width: min(88vw, 520px); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <canvas id="confetti"></canvas>
+
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/images/glovo-logo.png" alt="Glovo" onerror="this.style.display='none'">
+      <div class="brand-copy">
+        <strong>Kenya Event Games</strong>
+        <span>Food, groceries, shops, packages and quick wins</span>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button class="icon-btn" id="settingsBtn" type="button" aria-label="Game settings">⚙</button>
+      <button class="ghost-btn" id="restartBtn" type="button">Restart</button>
+      <button class="icon-btn" id="homeBtn" type="button" aria-label="Back to menu">H</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="screen active" id="hubScreen">
+      <div class="hub">
+        <div class="hero">
+          <h1>Glovo Kenya Game Hub</h1>
+          <p>Fast, bright corporate event games built for a shared screen and quick turns.</p>
+          <div class="city-strip">
+            <span class="pill">Nairobi</span>
+            <span class="pill">Mombasa</span>
+            <span class="pill">Kisumu</span>
+            <span class="pill">Nakuru</span>
+            <span class="pill">Eldoret</span>
+            <span class="pill">Diani</span>
+            <span class="pill">Thika</span>
+          </div>
+        </div>
+        <div class="game-grid">
+          <button class="game-card featured" type="button" data-game="wheel">
+            <span class="game-icon"><img src="assets/images/top-performers.png" alt=""></span>
+            <span class="game-copy">
+              <h2>Spin the Glovo Wheel</h2>
+              <p>Tap to spin, land on a prize image, celebrate the winner.</p>
+            </span>
+          </button>
+          <button class="game-card" type="button" data-game="rush">
+            <span class="game-icon"><img src="assets/images/delivery-with-glovo.png" alt=""></span>
+            <span class="game-copy">
+              <h2>Glovo Rush</h2>
+              <p>Sort orders into the right Glovo category.</p>
+            </span>
+          </button>
+          <button class="game-card" type="button" data-game="deliver">
+            <span class="game-icon"><img src="assets/images/self-delivery.png" alt=""></span>
+            <span class="game-copy">
+              <h2>Deliver in 30</h2>
+              <p>Guide the courier across the city before time runs out.</p>
+            </span>
+          </button>
+          <button class="game-card" type="button" data-game="memory">
+            <span class="game-icon"><img src="assets/images/promotions.png" alt=""></span>
+            <span class="game-copy">
+              <h2>Courier Memory Match</h2>
+              <p>Match delivery cards as quickly as possible.</p>
+            </span>
+          </button>
+          <button class="game-card" type="button" data-game="puzzle">
+            <span class="game-icon"><img src="assets/images/manage-store.png" alt=""></span>
+            <span class="game-copy">
+              <h2>Glovo Image Puzzle</h2>
+              <p>Swap the pieces until the Glovo image is complete.</p>
+            </span>
+          </button>
+          <button class="game-card" type="button" data-game="tug">
+            <span class="game-icon"><img src="assets/images/glovo-logo.png" alt=""></span>
+            <span class="game-copy">
+              <h2>Glovo Tug Rush</h2>
+              <p>Two teams answer fast and pull the bag across the line.</p>
+            </span>
+          </button>
+          <button class="game-card" type="button" data-game="battle">
+            <span class="game-icon"><img src="assets/images/pickup.png" alt=""></span>
+            <span class="game-copy">
+              <h2>Delivery Battle</h2>
+              <p>Correct answers push your courier closer to the customer.</p>
+            </span>
+          </button>
+          <button class="game-card" type="button" data-game="baggrab">
+            <span class="game-icon"><img src="assets/images/menu-optimisation.png" alt=""></span>
+            <span class="game-copy">
+              <h2>Glovo Bag Grab</h2>
+              <p>Answer to grab the right falling items into your team bag.</p>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="wheelScreen">
+      <div class="game-shell">
+        <div class="game-heading">
+          <h1>Spin the Glovo Wheel</h1>
+          <div class="score-row"><div class="stat"><span>Prize</span><b id="wheelPrize">Ready</b></div></div>
+        </div>
+        <div class="play-area">
+          <div class="wheel-layout">
+            <div class="wheel-stage">
+              <div class="pointer" aria-hidden="true"></div>
+              <canvas id="wheelCanvas" width="900" height="900"></canvas>
+            </div>
+            <div class="wheel-panel">
+              <div class="result-tile" id="wheelResult">
+                <div>
+                  <img src="assets/images/glovo-logo.png" alt="Glovo prize preview">
+                  <strong>Tap spin</strong>
+                </div>
+              </div>
+              <button class="primary-btn" id="spinBtn" type="button">Spin</button>
+              <button class="ghost-btn" id="resetWheelBtn" type="button">Reset Wheel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="rushScreen">
+      <div class="game-shell">
+        <div class="game-heading">
+          <h1>Glovo Rush</h1>
+          <div class="score-row">
+            <div class="stat"><span>Score</span><b id="rushScore">0</b></div>
+            <div class="stat"><span>Time</span><b id="rushTime">45</b></div>
+          </div>
+        </div>
+        <div class="play-area">
+          <div class="rush-layout">
+            <div class="order-card">
+              <img id="rushImage" src="assets/images/delivery-with-glovo.png" alt="">
+              <h2 id="rushOrder">Press Start</h2>
+              <button class="primary-btn" id="startRushBtn" type="button">Start Rush</button>
+            </div>
+            <div class="category-grid" id="rushCategories"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="deliverScreen">
+      <div class="game-shell">
+        <div class="game-heading">
+          <h1>Deliver in 30</h1>
+          <div class="score-row">
+            <div class="stat"><span>Drops</span><b id="deliverScore">0/3</b></div>
+            <div class="stat"><span>Time</span><b id="deliverTime">30</b></div>
+          </div>
+        </div>
+        <div class="play-area">
+          <div class="deliver-layout">
+            <div class="city-board" id="cityBoard"></div>
+            <div class="side-panel">
+              <h2 id="dropLabel">Nairobi route</h2>
+              <p>Use arrow keys or the controls. Reach all three delivery pins before the timer ends.</p>
+              <div class="control-pad">
+                <span></span><button type="button" data-move="up">U</button><span></span>
+                <button type="button" data-move="left">L</button><span></span><button type="button" data-move="right">R</button>
+                <span></span><button type="button" data-move="down">D</button><span></span>
+              </div>
+              <button class="primary-btn" id="startDeliverBtn" type="button">Start Route</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="memoryScreen">
+      <div class="game-shell">
+        <div class="game-heading">
+          <h1>Courier Memory Match</h1>
+          <div class="score-row">
+            <div class="stat"><span>Moves</span><b id="memoryMoves">0</b></div>
+            <div class="stat"><span>Pairs</span><b id="memoryPairs">0/8</b></div>
+          </div>
+        </div>
+        <div class="play-area">
+          <div class="memory-board" id="memoryBoard"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="puzzleScreen">
+      <div class="game-shell">
+        <div class="game-heading">
+          <h1>Glovo Image Puzzle</h1>
+          <div class="score-row"><div class="stat"><span>Swaps</span><b id="puzzleMoves">0</b></div></div>
+        </div>
+        <div class="play-area">
+          <div class="puzzle-layout">
+            <div class="puzzle-board" id="puzzleBoard"></div>
+            <div class="side-panel">
+              <h2>Complete the image</h2>
+              <p>Tap one tile, then another tile to swap them. Finish the full Glovo image to win.</p>
+              <button class="primary-btn" id="shufflePuzzleBtn" type="button">Shuffle Puzzle</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="tugScreen">
+      <div class="game-shell">
+        <div class="game-heading">
+          <h1>Glovo Tug Rush</h1>
+          <div class="score-row">
+            <div class="stat"><span>Question</span><b id="tugRound">1/10</b></div>
+            <div class="stat"><span>Pull</span><b id="tugPull">Center</b></div>
+          </div>
+        </div>
+        <div class="play-area">
+          <div class="duel-layout">
+            <div class="team-panel">
+              <img src="assets/images/delivery-with-glovo.png" alt="">
+              <h2>Team Left</h2>
+              <button class="primary-btn" type="button" data-tug-team="left">Left Answers</button>
+            </div>
+            <div class="arena">
+              <div class="question-box">
+                <span>Fastest correct answer pulls the bag</span>
+                <h2 id="tugQuestion">Press Start</h2>
+              </div>
+              <div class="choice-grid" id="tugChoices"></div>
+              <div class="battle-track">
+                <div class="middle-line"></div>
+                <div class="marker" id="tugMarker"><img src="assets/images/glovo-logo.png" alt=""></div>
+              </div>
+              <button class="primary-btn" id="startTugBtn" type="button">Start Tug Rush</button>
+            </div>
+            <div class="team-panel">
+              <img src="assets/images/self-delivery.png" alt="">
+              <h2>Team Right</h2>
+              <button class="primary-btn" type="button" data-tug-team="right">Right Answers</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="battleScreen">
+      <div class="game-shell">
+        <div class="game-heading">
+          <h1>Delivery Battle</h1>
+          <div class="score-row">
+            <div class="stat"><span>Question</span><b id="battleRound">1/10</b></div>
+            <div class="stat"><span>Lead</span><b id="battleLead">Even</b></div>
+          </div>
+        </div>
+        <div class="play-area">
+          <div class="duel-layout">
+            <div class="team-panel">
+              <img src="assets/images/pickup.png" alt="">
+              <h2>Green Courier</h2>
+              <button class="primary-btn" type="button" data-battle-team="left">Green Answers</button>
+            </div>
+            <div class="arena">
+              <div class="question-box">
+                <span>Correct answer moves your courier</span>
+                <h2 id="battleQuestion">Press Start</h2>
+              </div>
+              <div class="choice-grid" id="battleChoices"></div>
+              <div class="battle-track">
+                <div class="marker" id="battleLeftMarker" style="left:8%"><img src="assets/images/pickup.png" alt=""></div>
+                <div class="marker" id="battleRightMarker" style="left:8%"><img src="assets/images/self-delivery.png" alt=""></div>
+              </div>
+              <button class="primary-btn" id="startBattleBtn" type="button">Start Delivery Battle</button>
+            </div>
+            <div class="team-panel">
+              <img src="assets/images/self-delivery.png" alt="">
+              <h2>Yellow Courier</h2>
+              <button class="primary-btn" type="button" data-battle-team="right">Yellow Answers</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="baggrabScreen">
+      <div class="game-shell">
+        <div class="game-heading">
+          <h1>Glovo Bag Grab</h1>
+          <div class="score-row">
+            <div class="stat"><span>Round</span><b id="bagRound">1/10</b></div>
+            <div class="stat"><span>Target</span><b id="bagTarget">Ready</b></div>
+          </div>
+        </div>
+        <div class="play-area">
+          <div class="duel-layout">
+            <div class="team-panel">
+              <img src="assets/images/manage-store.png" alt="">
+              <h2>Team Left</h2>
+              <div class="stat"><span>Score</span><b id="bagLeftScore">0</b></div>
+              <button class="primary-btn" type="button" data-bag-team="left">Left Grabs</button>
+            </div>
+            <div class="arena">
+              <div class="question-box">
+                <span>Grab only the target item</span>
+                <h2 id="bagQuestion">Press Start</h2>
+              </div>
+              <div class="bag-arena" id="bagArena"></div>
+              <div class="choice-grid" id="bagChoices"></div>
+              <button class="primary-btn" id="startBagBtn" type="button">Start Bag Grab</button>
+            </div>
+            <div class="team-panel">
+              <img src="assets/images/promotions.png" alt="">
+              <h2>Team Right</h2>
+              <div class="stat"><span>Score</span><b id="bagRightScore">0</b></div>
+              <button class="primary-btn" type="button" data-bag-team="right">Right Grabs</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <div class="overlay" id="settingsOverlay">
+    <div class="modal settings-modal">
+      <h2>Host Settings</h2>
+      <div class="setting-row">
+        <label for="difficultySelect">Difficulty</label>
+        <select id="difficultySelect">
+          <option value="easy">Easy - current warm-up level</option>
+          <option value="standard">Standard - sharper event mode</option>
+          <option value="hard">Hard - fast adult challenge</option>
+          <option value="expert">Expert - high-pressure final round</option>
+        </select>
+      </div>
+      <p class="difficulty-note" id="difficultyNote">Easy keeps the current relaxed timers, smaller puzzle, and forgiving penalties.</p>
+      <button class="primary-btn" id="applySettingsBtn" type="button">Apply Settings</button>
+      <button class="ghost-btn" id="closeSettingsBtn" type="button">Close</button>
+    </div>
+  </div>
+  <div class="overlay" id="modalOverlay">
+    <div class="modal">
+      <img id="modalImage" src="assets/images/glovo-logo.png" alt="">
+      <h2 id="modalTitle">Great job</h2>
+      <p id="modalText">Ready for the next player.</p>
+      <button class="primary-btn" id="modalCloseBtn" type="button">Continue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+const imageBase = "assets/images/";
+const fallbackImage = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240"><rect width="320" height="240" rx="18" fill="#ffc244"/><circle cx="160" cy="104" r="54" fill="#00a082"/><text x="160" y="194" text-anchor="middle" font-family="Arial" font-size="34" font-weight="900" fill="#121212">GLOVO</text></svg>`);
+const categories = ["Food", "Groceries", "SuperGlovo", "Shops", "Package Delivery", "Pharmacy & Beauty"];
+const difficultyProfiles = {
+  easy: {
+    note: "Easy keeps the current relaxed timers, smaller puzzle, and forgiving penalties.",
+    rushTime: 45,
+    rushPenalty: 5,
+    deliverTime: 30,
+    deliverPenalty: 0,
+    deliverDrops: 3,
+    extraBlocks: 0,
+    memoryPairs: 8,
+    memoryDelay: 700,
+    puzzleSize: 3,
+    teamRounds: 10,
+    tugGoal: 5,
+    wrongHelpsOpponent: false,
+    battleGoal: 10,
+    bagPenalty: 0
+  },
+  standard: {
+    note: "Standard is a sharper adult event mode: shorter timers, more cards, a 4x4 puzzle, and wrong-answer pressure.",
+    rushTime: 35,
+    rushPenalty: 8,
+    deliverTime: 26,
+    deliverPenalty: 2,
+    deliverDrops: 4,
+    extraBlocks: 2,
+    memoryPairs: 10,
+    memoryDelay: 600,
+    puzzleSize: 4,
+    teamRounds: 12,
+    tugGoal: 6,
+    wrongHelpsOpponent: true,
+    battleGoal: 12,
+    bagPenalty: 1
+  },
+  hard: {
+    note: "Hard trims the room for hesitation: faster play, more blockers, more memory pairs, and bigger penalties.",
+    rushTime: 28,
+    rushPenalty: 12,
+    deliverTime: 22,
+    deliverPenalty: 3,
+    deliverDrops: 5,
+    extraBlocks: 4,
+    memoryPairs: 12,
+    memoryDelay: 480,
+    puzzleSize: 4,
+    teamRounds: 14,
+    tugGoal: 7,
+    wrongHelpsOpponent: true,
+    battleGoal: 14,
+    bagPenalty: 1
+  },
+  expert: {
+    note: "Expert is for finals: very tight timers, maximum blockers, 5x5 puzzle, and punishing wrong answers.",
+    rushTime: 22,
+    rushPenalty: 15,
+    deliverTime: 18,
+    deliverPenalty: 4,
+    deliverDrops: 6,
+    extraBlocks: 6,
+    memoryPairs: 14,
+    memoryDelay: 360,
+    puzzleSize: 5,
+    teamRounds: 16,
+    tugGoal: 8,
+    wrongHelpsOpponent: true,
+    battleGoal: 16,
+    bagPenalty: 2
+  }
+};
+let gameSettings = { difficulty: "easy" };
+
+function profile() {
+  return difficultyProfiles[gameSettings.difficulty] || difficultyProfiles.easy;
+}
+const prizeData = [
+  { name: "Lunch Voucher", image: "delivery-with-glovo.png", color: "#ffc244" },
+  { name: "Free Delivery", image: "self-delivery.png", color: "#00a082" },
+  { name: "Glovo Merch", image: "promotions.png", color: "#ffffff" },
+  { name: "Bonus Spin", image: "top-performers.png", color: "#111111" },
+  { name: "Grocery Treat", image: "manage-store.png", color: "#ffc244" },
+  { name: "Shop Surprise", image: "ads.png", color: "#00a082" },
+  { name: "Pick Up Pass", image: "pickup.png", color: "#ffffff" },
+  { name: "Menu Deal", image: "menu-optimisation.png", color: "#111111" }
+];
+
+const orders = [
+  { name: "Chicken Inn combo", category: "Food", image: "delivery-with-glovo.png" },
+  { name: "Pizza night order", category: "Food", image: "delivery-with-glovo.png" },
+  { name: "Weekly groceries", category: "Groceries", image: "manage-store.png" },
+  { name: "Fresh supermarket basket", category: "SuperGlovo", image: "manage-store.png" },
+  { name: "Office charger", category: "Shops", image: "ads.png" },
+  { name: "Gift pickup", category: "Package Delivery", image: "pickup.png" },
+  { name: "Beauty essentials", category: "Pharmacy & Beauty", image: "promotions.png" },
+  { name: "Medicine refill", category: "Pharmacy & Beauty", image: "promotions.png" },
+  { name: "Send a parcel to Westlands", category: "Package Delivery", image: "self-delivery.png" },
+  { name: "Quick snack run", category: "Food", image: "delivery-with-glovo.png" }
+];
+
+const teamQuestions = [
+  { question: "Which city is Kenya's capital?", choices: ["Nairobi", "Kisumu", "Diani", "Thika"], answer: "Nairobi" },
+  { question: "What Glovo category fits a pizza order?", choices: ["Food", "Shops", "Package Delivery", "Beauty"], answer: "Food" },
+  { question: "8 + 7 = ?", choices: ["13", "14", "15", "16"], answer: "15" },
+  { question: "Which item belongs in groceries?", choices: ["Milk", "Helmet", "Roadblock", "Receipt"], answer: "Milk" },
+  { question: "Which city is on the Kenyan coast?", choices: ["Mombasa", "Nakuru", "Eldoret", "Thika"], answer: "Mombasa" },
+  { question: "12 - 5 = ?", choices: ["5", "6", "7", "8"], answer: "7" },
+  { question: "A parcel delivery goes under which category?", choices: ["Package Delivery", "Food", "Groceries", "SuperGlovo"], answer: "Package Delivery" },
+  { question: "Which one is a fast delivery signal?", choices: ["Map pin", "Umbrella", "Calendar", "Speaker"], answer: "Map pin" },
+  { question: "6 x 3 = ?", choices: ["16", "18", "21", "24"], answer: "18" },
+  { question: "Which color is strongly linked with Glovo?", choices: ["Yellow", "Purple", "Brown", "Grey"], answer: "Yellow" }
+  ,{ question: "A basket has KSh 1,250 in groceries and a KSh 180 delivery fee. Total?", choices: ["KSh 1,330", "KSh 1,430", "KSh 1,530", "KSh 1,070"], answer: "KSh 1,430" }
+  ,{ question: "A courier completes 3 drops in 27 minutes. Average minutes per drop?", choices: ["7", "8", "9", "10"], answer: "9" }
+  ,{ question: "Which metric best measures late deliveries?", choices: ["On-time rate", "Logo size", "Menu color", "App downloads only"], answer: "On-time rate" }
+  ,{ question: "If demand doubles and couriers stay the same, what gets harder?", choices: ["ETA accuracy", "Logo placement", "Receipt color", "App icon shape"], answer: "ETA accuracy" }
+  ,{ question: "Which partner set appeared in the Glovo Kenya Brands Day post?", choices: ["Coca-Cola, Safaricom, NIVEA", "NASA, FIFA, Netflix", "Apple, Tesla, Lego", "IKEA, Spotify, DHL"], answer: "Coca-Cola, Safaricom, NIVEA" }
+  ,{ question: "What is retail media trying to improve?", choices: ["Reach, engagement, sales", "Road width", "Phone battery", "Weather"], answer: "Reach, engagement, sales" }
+  ,{ question: "A 12-minute ETA increases by 25%. New ETA?", choices: ["13 min", "14 min", "15 min", "18 min"], answer: "15 min" }
+  ,{ question: "Which is most like a delivery operations bottleneck?", choices: ["Too many orders in one zone", "Too many logo colors", "Too much confetti", "Too many fonts"], answer: "Too many orders in one zone" }
+];
+
+const screens = {
+  hub: $("#hubScreen"),
+  wheel: $("#wheelScreen"),
+  rush: $("#rushScreen"),
+  deliver: $("#deliverScreen"),
+  memory: $("#memoryScreen"),
+  puzzle: $("#puzzleScreen"),
+  tug: $("#tugScreen"),
+  battle: $("#battleScreen"),
+  baggrab: $("#baggrabScreen")
+};
+
+let activeGame = "hub";
+let timers = [];
+
+document.addEventListener("error", (event) => {
+  if (event.target && event.target.tagName === "IMG" && !event.target.dataset.fallback) {
+    event.target.dataset.fallback = "true";
+    event.target.src = fallbackImage;
+  }
+}, true);
+
+function setText(id, value) {
+  const el = $(id);
+  if (el) el.textContent = value;
+}
+
+function imgPath(name) {
+  return imageBase + name;
+}
+
+function showScreen(name) {
+  timers.forEach((id) => clearInterval(id));
+  timers = [];
+  $$(".screen").forEach((screen) => screen.classList.remove("active"));
+  screens[name].classList.add("active");
+  activeGame = name;
+  $("#restartBtn").style.visibility = name === "hub" ? "hidden" : "visible";
+  $("#homeBtn").style.visibility = name === "hub" ? "hidden" : "visible";
+  if (name === "wheel") initWheel();
+  if (name === "rush") initRush();
+  if (name === "deliver") initDeliver();
+  if (name === "memory") initMemory();
+  if (name === "puzzle") initPuzzle();
+  if (name === "tug") initTug();
+  if (name === "battle") initBattle();
+  if (name === "baggrab") initBagGrab();
+}
+
+function restartActive() {
+  if (activeGame === "wheel") initWheel(true);
+  if (activeGame === "rush") initRush();
+  if (activeGame === "deliver") initDeliver();
+  if (activeGame === "memory") initMemory();
+  if (activeGame === "puzzle") initPuzzle();
+  if (activeGame === "tug") initTug();
+  if (activeGame === "battle") initBattle();
+  if (activeGame === "baggrab") initBagGrab();
+}
+
+function showToast(message) {
+  const toast = $("#toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 900);
+}
+
+function showModal(title, text, image) {
+  $("#modalTitle").textContent = title;
+  $("#modalText").textContent = text;
+  $("#modalImage").src = image ? imgPath(image) : imgPath("glovo-logo.png");
+  $("#modalOverlay").classList.add("show");
+}
+
+$("#modalCloseBtn").addEventListener("click", () => $("#modalOverlay").classList.remove("show"));
+$("#settingsBtn").addEventListener("click", () => {
+  $("#difficultySelect").value = gameSettings.difficulty;
+  $("#difficultyNote").textContent = profile().note;
+  $("#settingsOverlay").classList.add("show");
+});
+$("#closeSettingsBtn").addEventListener("click", () => $("#settingsOverlay").classList.remove("show"));
+$("#difficultySelect").addEventListener("change", (event) => {
+  const nextProfile = difficultyProfiles[event.target.value] || difficultyProfiles.easy;
+  $("#difficultyNote").textContent = nextProfile.note;
+});
+$("#applySettingsBtn").addEventListener("click", () => {
+  gameSettings.difficulty = $("#difficultySelect").value;
+  $("#settingsOverlay").classList.remove("show");
+  showToast(`Difficulty: ${gameSettings.difficulty.toUpperCase()}`);
+  if (activeGame !== "hub") restartActive();
+});
+$("#homeBtn").addEventListener("click", () => showScreen("hub"));
+$("#restartBtn").addEventListener("click", restartActive);
+$$("[data-game]").forEach((button) => button.addEventListener("click", () => showScreen(button.dataset.game)));
+
+const wheelCanvas = $("#wheelCanvas");
+const wheelCtx = wheelCanvas.getContext("2d");
+const wheelImages = new Map();
+let wheelRotation = 0;
+let wheelSpinning = false;
+
+function loadWheelImages() {
+  prizeData.forEach((prize) => {
+    if (wheelImages.has(prize.image)) return;
+    const img = new Image();
+    img.src = imgPath(prize.image);
+    img.onload = () => drawWheel();
+    img.onerror = () => drawWheel();
+    wheelImages.set(prize.image, img);
+  });
+}
+
+function initWheel(keepRotation = false) {
+  loadWheelImages();
+  wheelSpinning = false;
+  if (!keepRotation) wheelRotation = 0;
+  $("#spinBtn").disabled = false;
+  $("#wheelPrize").textContent = "Ready";
+  $("#wheelResult").innerHTML = `<div><img src="${imgPath("glovo-logo.png")}" alt="Glovo"><strong>Tap spin</strong></div>`;
+  drawWheel();
+}
+
+function drawWheel() {
+  const size = wheelCanvas.width;
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = size * 0.43;
+  const segment = (Math.PI * 2) / prizeData.length;
+  wheelCtx.clearRect(0, 0, size, size);
+  wheelCtx.save();
+  wheelCtx.translate(cx, cy);
+  wheelCtx.rotate(wheelRotation);
+
+  prizeData.forEach((prize, index) => {
+    const start = -Math.PI / 2 + index * segment;
+    const end = start + segment;
+    wheelCtx.beginPath();
+    wheelCtx.moveTo(0, 0);
+    wheelCtx.arc(0, 0, radius, start, end);
+    wheelCtx.closePath();
+    wheelCtx.fillStyle = prize.color;
+    wheelCtx.fill();
+    wheelCtx.lineWidth = 8;
+    wheelCtx.strokeStyle = "#121212";
+    wheelCtx.stroke();
+
+    wheelCtx.save();
+    wheelCtx.rotate(start + segment / 2);
+    wheelCtx.translate(radius * 0.58, 0);
+    wheelCtx.rotate(Math.PI / 2);
+    const img = wheelImages.get(prize.image);
+    if (img && img.complete && img.naturalWidth) {
+      wheelCtx.drawImage(img, -48, -58, 96, 96);
+    } else {
+      wheelCtx.fillStyle = prize.color === "#111111" ? "#ffffff" : "#121212";
+      wheelCtx.font = "900 42px Arial";
+      wheelCtx.textAlign = "center";
+      wheelCtx.fillText("G", 0, 16);
+    }
+    wheelCtx.fillStyle = prize.color === "#111111" ? "#ffffff" : "#121212";
+    wheelCtx.font = "900 25px Arial";
+    wheelCtx.textAlign = "center";
+    wrapCanvasText(wheelCtx, prize.name, 0, 68, 112, 27);
+    wheelCtx.restore();
+  });
+
+  wheelCtx.beginPath();
+  wheelCtx.arc(0, 0, radius * 0.18, 0, Math.PI * 2);
+  wheelCtx.fillStyle = "#ffffff";
+  wheelCtx.fill();
+  wheelCtx.lineWidth = 8;
+  wheelCtx.strokeStyle = "#121212";
+  wheelCtx.stroke();
+  wheelCtx.fillStyle = "#00a082";
+  wheelCtx.font = "1000 58px Arial";
+  wheelCtx.textAlign = "center";
+  wheelCtx.textBaseline = "middle";
+  wheelCtx.fillText("G", 0, 4);
+  wheelCtx.restore();
+}
+
+function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(" ");
+  let line = "";
+  let offset = 0;
+  words.forEach((word, idx) => {
+    const test = line ? line + " " + word : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      ctx.fillText(line, x, y + offset);
+      line = word;
+      offset += lineHeight;
+    } else {
+      line = test;
+    }
+    if (idx === words.length - 1) ctx.fillText(line, x, y + offset);
+  });
+}
+
+function spinWheel() {
+  if (wheelSpinning) return;
+  wheelSpinning = true;
+  $("#spinBtn").disabled = true;
+  const selected = Math.floor(Math.random() * prizeData.length);
+  const segment = (Math.PI * 2) / prizeData.length;
+  const targetAngle = -(selected * segment + segment / 2);
+  const fullTurns = 6 + Math.floor(Math.random() * 3);
+  const start = wheelRotation;
+  const end = targetAngle + fullTurns * Math.PI * 2;
+  const duration = 4300;
+  const startTime = performance.now();
+
+  function animate(now) {
+    const t = Math.min(1, (now - startTime) / duration);
+    const eased = 1 - Math.pow(1 - t, 4);
+    wheelRotation = start + (end - start) * eased;
+    drawWheel();
+    if (t < 1) {
+      requestAnimationFrame(animate);
+      return;
+    }
+    wheelSpinning = false;
+    const prize = prizeData[selected];
+    $("#wheelPrize").textContent = prize.name;
+    $("#wheelResult").innerHTML = `<div><img src="${imgPath(prize.image)}" alt="${prize.name}"><strong>${prize.name}</strong></div>`;
+    showModal("You won!", prize.name, prize.image);
+    launchConfetti();
+    $("#spinBtn").disabled = false;
+  }
+  requestAnimationFrame(animate);
+}
+
+$("#spinBtn").addEventListener("click", spinWheel);
+$("#resetWheelBtn").addEventListener("click", () => initWheel());
+
+let rushScore = 0;
+let rushTime = 45;
+let currentOrder = null;
+let rushActive = false;
+
+function initRush() {
+  const settings = profile();
+  rushScore = 0;
+  rushTime = settings.rushTime;
+  rushActive = false;
+  $("#rushScore").textContent = "0";
+  $("#rushTime").textContent = rushTime;
+  $("#rushOrder").textContent = "Press Start";
+  $("#rushImage").src = imgPath("delivery-with-glovo.png");
+  $("#startRushBtn").style.display = "inline-block";
+  $("#rushCategories").innerHTML = categories.map((cat) => `<button class="category-btn" type="button" data-category="${cat}">${cat}</button>`).join("");
+  $$("#rushCategories button").forEach((button) => button.addEventListener("click", () => answerRush(button.dataset.category)));
+}
+
+function startRush() {
+  rushActive = true;
+  $("#startRushBtn").style.display = "none";
+  nextOrder();
+  const id = setInterval(() => {
+    rushTime -= 1;
+    $("#rushTime").textContent = rushTime;
+    if (rushTime <= 0) {
+      clearInterval(id);
+      rushActive = false;
+      showModal("Rush complete", `Final score: ${rushScore}`, "glovo-logo.png");
+      launchConfetti();
+    }
+  }, 1000);
+  timers.push(id);
+}
+
+function nextOrder() {
+  const availableOrders = orders.filter((order) => categories.includes(order.category));
+  currentOrder = availableOrders[Math.floor(Math.random() * availableOrders.length)];
+  $("#rushOrder").textContent = currentOrder.name;
+  $("#rushImage").src = imgPath(currentOrder.image);
+}
+
+function answerRush(category) {
+  if (!rushActive || !currentOrder) return;
+  if (category === currentOrder.category) {
+    rushScore += 10;
+    showToast("Correct");
+  } else {
+    rushScore = Math.max(0, rushScore - profile().rushPenalty);
+    showToast(`That was ${currentOrder.category}`);
+  }
+  $("#rushScore").textContent = rushScore;
+  nextOrder();
+}
+
+$("#startRushBtn").addEventListener("click", startRush);
+
+const drops = [
+  { x: 5, y: 0, label: "Westlands lunch" },
+  { x: 0, y: 5, label: "Kilimani groceries" },
+  { x: 5, y: 5, label: "Karen package" },
+  { x: 3, y: 0, label: "CBD office snacks" },
+  { x: 1, y: 3, label: "Lavington pharmacy" },
+  { x: 4, y: 5, label: "Mombasa Road shop run" }
+];
+const blocks = new Set(["2,0", "2,1", "2,3", "3,3", "4,1", "1,4", "4,4"]);
+const extraBlocks = ["3,1", "1,1", "0,3", "5,2", "3,5", "5,4"];
+let rider = { x: 0, y: 0 };
+let dropIndex = 0;
+let deliverTime = 30;
+let deliverActive = false;
+
+function initDeliver() {
+  const settings = profile();
+  timers.forEach((id) => clearInterval(id));
+  timers = [];
+  rider = { x: 0, y: 0 };
+  dropIndex = 0;
+  deliverTime = settings.deliverTime;
+  deliverActive = false;
+  $("#deliverTime").textContent = deliverTime;
+  $("#deliverScore").textContent = `0/${settings.deliverDrops}`;
+  $("#dropLabel").textContent = drops[0].label;
+  renderCity();
+}
+
+function activeBlocks() {
+  return new Set([...blocks, ...extraBlocks.slice(0, profile().extraBlocks)]);
+}
+
+function renderCity() {
+  const board = $("#cityBoard");
+  board.innerHTML = "";
+  for (let y = 0; y < 6; y += 1) {
+    for (let x = 0; x < 6; x += 1) {
+      const div = document.createElement("div");
+      div.className = "cell";
+      if (activeBlocks().has(`${x},${y}`)) {
+        div.classList.add("block");
+        div.textContent = "X";
+      }
+      const drop = drops[dropIndex];
+      if (drop && drop.x === x && drop.y === y) {
+        div.classList.add("drop");
+        div.textContent = "PIN";
+      }
+      if (rider.x === x && rider.y === y) {
+        div.classList.add("rider");
+        div.textContent = "GO";
+      }
+      board.appendChild(div);
+    }
+  }
+}
+
+function startDeliver() {
+  if (deliverActive) return;
+  deliverActive = true;
+  const id = setInterval(() => {
+    deliverTime -= 1;
+    $("#deliverTime").textContent = deliverTime;
+    if (deliverTime <= 0) {
+      clearInterval(id);
+      deliverActive = false;
+      showModal("Time up", `Completed ${dropIndex} of 3 drops`, "self-delivery.png");
+    }
+  }, 1000);
+  timers.push(id);
+}
+
+function moveRider(direction) {
+  if (!deliverActive) startDeliver();
+  const next = { ...rider };
+  if (direction === "up") next.y -= 1;
+  if (direction === "down") next.y += 1;
+  if (direction === "left") next.x -= 1;
+  if (direction === "right") next.x += 1;
+  if (next.x < 0 || next.x > 5 || next.y < 0 || next.y > 5 || activeBlocks().has(`${next.x},${next.y}`)) {
+    if (profile().deliverPenalty) {
+      deliverTime = Math.max(0, deliverTime - profile().deliverPenalty);
+      $("#deliverTime").textContent = deliverTime;
+    }
+    showToast("Road blocked");
+    return;
+  }
+  rider = next;
+  const drop = drops[dropIndex];
+  if (drop && rider.x === drop.x && rider.y === drop.y) {
+    dropIndex += 1;
+    $("#deliverScore").textContent = `${dropIndex}/${profile().deliverDrops}`;
+    if (dropIndex === profile().deliverDrops) {
+      deliverActive = false;
+      timers.forEach((id) => clearInterval(id));
+      timers = [];
+      renderCity();
+      showModal("Delivered!", "All Glovo Kenya drops completed.", "delivery-with-glovo.png");
+      launchConfetti();
+      return;
+    }
+    $("#dropLabel").textContent = drops[dropIndex].label;
+    showToast("Drop complete");
+  }
+  renderCity();
+}
+
+$("#startDeliverBtn").addEventListener("click", startDeliver);
+$$("[data-move]").forEach((button) => button.addEventListener("click", () => moveRider(button.dataset.move)));
+document.addEventListener("keydown", (event) => {
+  if (activeGame !== "deliver") return;
+  const map = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
+  if (map[event.key]) {
+    event.preventDefault();
+    moveRider(map[event.key]);
+  }
+});
+
+let memoryOpen = [];
+let memoryLock = false;
+let memoryMoves = 0;
+let memoryPairs = 0;
+
+const glovoCardLogo = `<svg viewBox="0 0 171 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M41.641 18.6392C41.641 16.8276 43.0516 15.3779 44.9066 15.3779C46.7606 15.3779 48.2122 16.8276 48.2122 18.6392V52.335C48.2122 54.1867 46.7606 55.5963 44.9066 55.5963C43.0926 55.5963 41.641 54.1876 41.641 52.335V18.6392Z" fill="#009E81"></path>
+  <path d="M0 36.4334V36.3125C0 25.6847 8.14298 16.6666 19.6317 16.6666C25.356 16.6666 29.1452 18.0353 32.612 20.5318C33.2567 21.0147 33.9825 21.9405 33.9825 23.2292C33.9825 25.0408 32.5309 26.5305 30.6769 26.5305C29.7899 26.5305 29.1452 26.1685 28.6206 25.7656C26.1619 23.994 23.501 22.7863 19.3894 22.7863C12.3757 22.7863 7.05383 28.946 7.05383 36.1924V36.3134C7.05383 44.1237 12.2135 49.8805 19.9941 49.8805C23.582 49.8805 26.8467 48.7537 29.1852 47.0221V39.8966H21.6469C20.0342 39.8966 18.6636 38.6489 18.6636 36.9982C18.6636 35.3876 20.0342 34.0598 21.6469 34.0598H32.2486C34.1437 34.0598 35.6344 35.5095 35.6344 37.4411V47.586C35.6344 49.4785 34.8685 50.8472 33.2968 51.8131C30.0312 53.9866 25.4762 55.9592 19.7519 55.9592C7.86068 55.9592 0 47.505 0 36.4334Z" fill="#009E81"></path>
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M53.3319 41.0234V41.1443C53.3319 49.2757 59.781 55.9592 68.5287 56.0001C77.3974 56.0001 83.9277 49.1966 83.9277 41.0643V40.9434C83.9277 32.7302 77.4776 26.0476 68.6498 26.0476C59.8621 26.0476 53.3319 32.8111 53.3319 41.0234ZM77.3574 41.0234V41.1443C77.3574 46.0953 73.9707 50.2024 68.6107 50.2434C63.491 50.2434 59.863 46.0563 59.863 41.0643V40.9434C59.863 35.9505 63.2488 31.8043 68.5296 31.8043C73.7294 31.8043 77.3574 35.9914 77.3574 41.0234Z" fill="#009E81"></path>
+  <path d="M100.375 55.8783H100.052C98.2384 55.8783 97.0692 54.7515 96.3033 52.9799L86.7497 31.0795C86.565 30.5286 86.3873 29.9987 86.3873 29.4689C86.3873 27.8583 87.8389 26.3286 89.6529 26.3286C91.4669 26.3286 92.3539 27.3753 92.9185 28.704L100.296 47.706L107.794 28.5831C108.277 27.4563 109.164 26.2886 110.898 26.2886C112.712 26.2886 114.123 27.6573 114.123 29.4289C114.123 30.0327 113.922 30.6766 113.76 30.9986L104.126 52.9799C103.358 54.6705 102.149 55.8783 100.375 55.8783Z" fill="#009E81"></path>
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M116.459 41.0234V41.1443C116.459 49.2757 122.949 55.9592 131.696 56.0001C140.565 56.0001 147.095 49.1966 147.095 41.0643V40.9434C147.095 32.7302 140.645 26.0476 131.818 26.0476C122.989 26.0476 116.459 32.8111 116.459 41.0234ZM140.525 41.0234V41.1443C140.525 46.0953 137.138 50.2024 131.778 50.2434C126.659 50.2434 123.031 46.0563 123.031 41.0643V40.9434C123.031 35.9505 126.417 31.8043 131.697 31.8043C136.897 31.8043 140.525 35.9914 140.525 41.0234Z" fill="#009E81"></path>
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M145.16 12.9232C145.16 5.79679 150.966 0 158.1 0C165.235 0 171.04 5.79679 171 12.9232C171 15.6206 170.194 18.2371 168.581 20.4516L168.259 20.9345L161.526 30.4355C161.526 30.4355 160.68 31.7642 158.906 31.7642H157.294C155.48 31.7642 154.674 30.4355 154.674 30.4355L147.941 20.9345L147.579 20.4516C146.007 18.2371 145.16 15.6206 145.16 12.9232ZM163.059 17.1903L163.421 16.7074C164.227 15.5797 164.671 14.2919 164.671 12.8832C164.671 9.25998 161.728 6.32158 158.1 6.32158C154.472 6.32158 151.53 9.25998 151.53 12.8832C151.53 14.2519 151.974 15.5806 152.78 16.7074L153.142 17.2303L158.1 24.1949L163.059 17.1903Z" fill="#009E81"></path>
+  <path d="M158.06 34.0187C156.004 34.0187 154.472 35.5884 154.472 37.561C154.472 39.4526 156.004 41.0232 158.02 41.0632C160.117 41.0632 161.648 39.4936 161.648 37.561V37.521C161.648 35.5884 160.117 34.0187 158.06 34.0187Z" fill="#009E81"></path>
+</svg>`;
+
+function initMemory() {
+  const pairs = profile().memoryPairs;
+  memoryOpen = [];
+  memoryLock = false;
+  memoryMoves = 0;
+  memoryPairs = 0;
+  $("#memoryMoves").textContent = "0";
+  $("#memoryPairs").textContent = `0/${pairs}`;
+  $("#memoryBoard").style.gridTemplateColumns = `repeat(${pairs > 10 ? 7 : pairs > 8 ? 5 : 4}, minmax(70px, 1fr))`;
+  const pool = Array.from({ length: pairs }, (_, index) => {
+    const item = prizeData[index % prizeData.length];
+    return { ...item, name: index >= prizeData.length ? `${item.name} ${Math.floor(index / prizeData.length) + 1}` : item.name };
+  });
+  const deck = [...pool, ...pool].map((item, index) => ({ ...item, id: index, key: item.name }));
+  shuffle(deck);
+  $("#memoryBoard").innerHTML = "";
+  deck.forEach((card) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "memory-card";
+    button.dataset.key = card.key;
+    button.dataset.id = card.id;
+    button.innerHTML = `<span class="memory-back">${glovoCardLogo}</span><img src="${imgPath(card.image)}" alt="${card.name}">`;
+    button.addEventListener("click", () => flipMemory(button));
+    $("#memoryBoard").appendChild(button);
+  });
+}
+
+function flipMemory(card) {
+  if (memoryLock || card.classList.contains("open") || card.classList.contains("matched")) return;
+  card.classList.add("open");
+  memoryOpen.push(card);
+  if (memoryOpen.length !== 2) return;
+  memoryMoves += 1;
+  $("#memoryMoves").textContent = memoryMoves;
+  const [a, b] = memoryOpen;
+  if (a.dataset.key === b.dataset.key) {
+    a.classList.add("matched");
+    b.classList.add("matched");
+    memoryOpen = [];
+    memoryPairs += 1;
+    $("#memoryPairs").textContent = `${memoryPairs}/${profile().memoryPairs}`;
+    if (memoryPairs === profile().memoryPairs) {
+      showModal("Matched!", `Completed in ${memoryMoves} moves.`, "top-performers.png");
+      launchConfetti();
+    }
+    return;
+  }
+  memoryLock = true;
+  setTimeout(() => {
+    a.classList.remove("open");
+    b.classList.remove("open");
+    memoryOpen = [];
+    memoryLock = false;
+  }, profile().memoryDelay);
+}
+
+let puzzleOrder = [];
+let selectedTile = null;
+let puzzleMoves = 0;
+
+function initPuzzle() {
+  const size = profile().puzzleSize;
+  puzzleMoves = 0;
+  selectedTile = null;
+  $("#puzzleMoves").textContent = "0";
+  puzzleOrder = [...Array(size * size).keys()];
+  shuffle(puzzleOrder);
+  if (puzzleOrder.every((value, index) => value === index)) shuffle(puzzleOrder);
+  renderPuzzle();
+}
+
+function renderPuzzle() {
+  const size = profile().puzzleSize;
+  const board = $("#puzzleBoard");
+  board.style.setProperty("--puzzle-image", `url("${imgPath("delivery-with-glovo.png")}")`);
+  board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+  board.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+  board.innerHTML = "";
+  puzzleOrder.forEach((tileIndex, position) => {
+    const tile = document.createElement("button");
+    tile.type = "button";
+    tile.className = "puzzle-tile";
+    tile.dataset.position = position;
+    tile.dataset.tile = tileIndex;
+    const x = tileIndex % size;
+    const y = Math.floor(tileIndex / size);
+    const step = size === 1 ? 0 : 100 / (size - 1);
+    tile.style.backgroundSize = `${size * 100}% ${size * 100}%`;
+    tile.style.backgroundPosition = `${x * step}% ${y * step}%`;
+    tile.addEventListener("click", () => selectPuzzleTile(tile));
+    board.appendChild(tile);
+  });
+}
+
+function selectPuzzleTile(tile) {
+  if (!selectedTile) {
+    selectedTile = tile;
+    tile.classList.add("selected");
+    return;
+  }
+  if (selectedTile === tile) {
+    tile.classList.remove("selected");
+    selectedTile = null;
+    return;
+  }
+  const a = Number(selectedTile.dataset.position);
+  const b = Number(tile.dataset.position);
+  [puzzleOrder[a], puzzleOrder[b]] = [puzzleOrder[b], puzzleOrder[a]];
+  puzzleMoves += 1;
+  $("#puzzleMoves").textContent = puzzleMoves;
+  selectedTile = null;
+  renderPuzzle();
+  if (puzzleOrder.every((value, index) => value === index)) {
+    showModal("Image complete!", `Solved in ${puzzleMoves} swaps.`, "delivery-with-glovo.png");
+    launchConfetti();
+  }
+}
+
+$("#shufflePuzzleBtn").addEventListener("click", initPuzzle);
+
+let tugRound = 0;
+let tugPosition = 0;
+let tugAnswer = "";
+let tugActive = false;
+let tugTeam = "left";
+
+function initTug() {
+  tugRound = 0;
+  tugPosition = 0;
+  tugActive = false;
+  tugTeam = "left";
+  $("#tugRound").textContent = `1/${profile().teamRounds}`;
+  $("#tugPull").textContent = "Center";
+  $("#tugQuestion").textContent = "Press Start";
+  $("#tugChoices").innerHTML = "";
+  updateTugMarker();
+  $("#startTugBtn").style.display = "inline-block";
+}
+
+function startTug() {
+  tugActive = true;
+  $("#startTugBtn").style.display = "none";
+  nextTugQuestion();
+}
+
+function nextTugQuestion() {
+  if (Math.abs(tugPosition) >= profile().tugGoal || tugRound >= profile().teamRounds) {
+    const winner = tugPosition < 0 ? "Team Left" : tugPosition > 0 ? "Team Right" : "Both teams";
+    showModal("Tug Rush complete", `${winner} wins the pull.`, "glovo-logo.png");
+    launchConfetti();
+    return;
+  }
+  const q = teamQuestions[tugRound % teamQuestions.length];
+  tugAnswer = q.answer;
+  $("#tugRound").textContent = `${tugRound + 1}/${profile().teamRounds}`;
+  $("#tugQuestion").textContent = q.question;
+  $("#tugChoices").innerHTML = q.choices.map((choice) => `<button class="choice-btn" type="button" data-tug-choice="${choice}">${choice}</button>`).join("");
+  $$("[data-tug-choice]").forEach((button) => button.addEventListener("click", () => answerTug(button.dataset.tugChoice)));
+}
+
+function answerTug(choice) {
+  if (!tugActive) return;
+  if (choice !== tugAnswer) {
+    if (profile().wrongHelpsOpponent) {
+      tugPosition += tugTeam === "left" ? 1 : -1;
+      tugRound += 1;
+      tugTeam = tugTeam === "left" ? "right" : "left";
+      updateTugMarker();
+      nextTugQuestion();
+    }
+    showToast("Wrong answer");
+    return;
+  }
+  tugPosition += tugTeam === "left" ? -1 : 1;
+  tugRound += 1;
+  tugTeam = tugTeam === "left" ? "right" : "left";
+  updateTugMarker();
+  nextTugQuestion();
+}
+
+function updateTugMarker() {
+  const left = 50 + tugPosition * (40 / profile().tugGoal);
+  $("#tugMarker").style.left = `${Math.max(10, Math.min(90, left))}%`;
+  $("#tugPull").textContent = tugPosition === 0 ? "Center" : tugPosition < 0 ? `Left ${Math.abs(tugPosition)}` : `Right ${tugPosition}`;
+}
+
+$("#startTugBtn").addEventListener("click", startTug);
+$$("[data-tug-team]").forEach((button) => button.addEventListener("click", () => {
+  tugTeam = button.dataset.tugTeam;
+  showToast(`${tugTeam === "left" ? "Left" : "Right"} team answering`);
+}));
+
+let battleRound = 0;
+let battleAnswer = "";
+let battleTeam = "left";
+let battleLeft = 0;
+let battleRight = 0;
+let battleActive = false;
+
+function initBattle() {
+  battleRound = 0;
+  battleLeft = 0;
+  battleRight = 0;
+  battleActive = false;
+  battleTeam = "left";
+  $("#battleRound").textContent = `1/${profile().teamRounds}`;
+  $("#battleLead").textContent = "Even";
+  $("#battleQuestion").textContent = "Press Start";
+  $("#battleChoices").innerHTML = "";
+  updateBattleMarkers();
+  $("#startBattleBtn").style.display = "inline-block";
+}
+
+function startBattle() {
+  battleActive = true;
+  $("#startBattleBtn").style.display = "none";
+  nextBattleQuestion();
+}
+
+function nextBattleQuestion() {
+  if (battleLeft >= profile().battleGoal || battleRight >= profile().battleGoal || battleRound >= profile().teamRounds) {
+    const winner = battleLeft === battleRight ? "It is a tie" : battleLeft > battleRight ? "Green Courier wins" : "Yellow Courier wins";
+    showModal("Delivery Battle complete", winner, "pickup.png");
+    launchConfetti();
+    return;
+  }
+  const q = teamQuestions[(battleRound + 2) % teamQuestions.length];
+  battleAnswer = q.answer;
+  $("#battleRound").textContent = `${battleRound + 1}/${profile().teamRounds}`;
+  $("#battleQuestion").textContent = q.question;
+  $("#battleChoices").innerHTML = q.choices.map((choice) => `<button class="choice-btn" type="button" data-battle-choice="${choice}">${choice}</button>`).join("");
+  $$("[data-battle-choice]").forEach((button) => button.addEventListener("click", () => answerBattle(button.dataset.battleChoice)));
+}
+
+function answerBattle(choice) {
+  if (!battleActive) return;
+  if (choice !== battleAnswer) {
+    if (profile().wrongHelpsOpponent) {
+      if (battleTeam === "left") battleRight += 1;
+      else battleLeft += 1;
+      battleRound += 1;
+      battleTeam = battleTeam === "left" ? "right" : "left";
+      updateBattleMarkers();
+      nextBattleQuestion();
+    }
+    showToast("Wrong answer");
+    return;
+  }
+  if (battleTeam === "left") battleLeft += 1;
+  else battleRight += 1;
+  battleRound += 1;
+  battleTeam = battleTeam === "left" ? "right" : "left";
+  updateBattleMarkers();
+  nextBattleQuestion();
+}
+
+function updateBattleMarkers() {
+  const step = 84 / profile().battleGoal;
+  $("#battleLeftMarker").style.left = `${8 + battleLeft * step}%`;
+  $("#battleLeftMarker").style.top = "34%";
+  $("#battleRightMarker").style.left = `${8 + battleRight * step}%`;
+  $("#battleRightMarker").style.top = "66%";
+  $("#battleLead").textContent = battleLeft === battleRight ? "Even" : battleLeft > battleRight ? `Green +${battleLeft - battleRight}` : `Yellow +${battleRight - battleLeft}`;
+}
+
+$("#startBattleBtn").addEventListener("click", startBattle);
+$$("[data-battle-team]").forEach((button) => button.addEventListener("click", () => {
+  battleTeam = button.dataset.battleTeam;
+  showToast(`${battleTeam === "left" ? "Green" : "Yellow"} courier answering`);
+}));
+
+let bagRound = 0;
+let bagAnswer = "";
+let bagTeam = "left";
+let bagLeftScore = 0;
+let bagRightScore = 0;
+let bagActive = false;
+
+function initBagGrab() {
+  bagRound = 0;
+  bagLeftScore = 0;
+  bagRightScore = 0;
+  bagTeam = "left";
+  bagActive = false;
+  $("#bagRound").textContent = `1/${profile().teamRounds}`;
+  $("#bagTarget").textContent = "Ready";
+  $("#bagLeftScore").textContent = "0";
+  $("#bagRightScore").textContent = "0";
+  $("#bagQuestion").textContent = "Press Start";
+  $("#bagChoices").innerHTML = "";
+  $("#bagArena").innerHTML = "";
+  $("#startBagBtn").style.display = "inline-block";
+}
+
+function startBagGrab() {
+  bagActive = true;
+  $("#startBagBtn").style.display = "none";
+  nextBagRound();
+}
+
+function nextBagRound() {
+  if (bagRound >= profile().teamRounds) {
+    const winner = bagLeftScore === bagRightScore ? "It is a tie" : bagLeftScore > bagRightScore ? "Team Left wins" : "Team Right wins";
+    showModal("Bag Grab complete", `${winner}: ${bagLeftScore} - ${bagRightScore}`, "menu-optimisation.png");
+    launchConfetti();
+    return;
+  }
+  const q = teamQuestions[(bagRound + 5) % teamQuestions.length];
+  bagAnswer = q.answer;
+  $("#bagRound").textContent = `${bagRound + 1}/${profile().teamRounds}`;
+  $("#bagTarget").textContent = bagAnswer;
+  $("#bagQuestion").textContent = q.question;
+  $("#bagChoices").innerHTML = q.choices.map((choice) => `<button class="choice-btn" type="button" data-bag-choice="${choice}">${choice}</button>`).join("");
+  renderBagItems(q.choices);
+  $$("[data-bag-choice]").forEach((button) => button.addEventListener("click", () => answerBag(button.dataset.bagChoice)));
+}
+
+function renderBagItems(items) {
+  const arena = $("#bagArena");
+  arena.innerHTML = "";
+  items.forEach((item, index) => {
+    const el = document.createElement("div");
+    el.className = "fall-item";
+    el.textContent = item;
+    el.style.left = `${12 + index * 22}%`;
+    el.style.top = `${18 + (index % 2) * 56}px`;
+    arena.appendChild(el);
+  });
+}
+
+function answerBag(choice) {
+  if (!bagActive) return;
+  if (choice !== bagAnswer) {
+    showToast("Missed grab");
+    if (profile().bagPenalty) {
+      if (bagTeam === "left") {
+        bagLeftScore = Math.max(0, bagLeftScore - profile().bagPenalty);
+        $("#bagLeftScore").textContent = bagLeftScore;
+      } else {
+        bagRightScore = Math.max(0, bagRightScore - profile().bagPenalty);
+        $("#bagRightScore").textContent = bagRightScore;
+      }
+    }
+    bagRound += 1;
+    bagTeam = bagTeam === "left" ? "right" : "left";
+    nextBagRound();
+    return;
+  }
+  if (bagTeam === "left") {
+    bagLeftScore += 1;
+    $("#bagLeftScore").textContent = bagLeftScore;
+  } else {
+    bagRightScore += 1;
+    $("#bagRightScore").textContent = bagRightScore;
+  }
+  showToast(`${bagTeam === "left" ? "Left" : "Right"} grabs it`);
+  bagRound += 1;
+  bagTeam = bagTeam === "left" ? "right" : "left";
+  nextBagRound();
+}
+
+$("#startBagBtn").addEventListener("click", startBagGrab);
+$$("[data-bag-team]").forEach((button) => button.addEventListener("click", () => {
+  bagTeam = button.dataset.bagTeam;
+  showToast(`${bagTeam === "left" ? "Left" : "Right"} team grabbing`);
+}));
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+const confettiCanvas = $("#confetti");
+const confettiCtx = confettiCanvas.getContext("2d");
+let confettiParts = [];
+
+function launchConfetti() {
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+  confettiParts = Array.from({ length: 170 }, () => ({
+    x: Math.random() * confettiCanvas.width,
+    y: -20,
+    w: 7 + Math.random() * 10,
+    h: 4 + Math.random() * 8,
+    vx: (Math.random() - 0.5) * 6,
+    vy: 3 + Math.random() * 6,
+    rot: Math.random() * Math.PI,
+    vr: (Math.random() - 0.5) * 0.28,
+    color: ["#ffc244", "#00a082", "#ffffff", "#121212"][Math.floor(Math.random() * 4)]
+  }));
+  confettiLoop();
+}
+
+function confettiLoop() {
+  confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  confettiParts = confettiParts.filter((part) => part.y < confettiCanvas.height + 40);
+  confettiParts.forEach((part) => {
+    part.x += part.vx;
+    part.y += part.vy;
+    part.rot += part.vr;
+    part.vy += 0.09;
+    confettiCtx.save();
+    confettiCtx.translate(part.x, part.y);
+    confettiCtx.rotate(part.rot);
+    confettiCtx.fillStyle = part.color;
+    confettiCtx.fillRect(-part.w / 2, -part.h / 2, part.w, part.h);
+    confettiCtx.restore();
+  });
+  if (confettiParts.length) requestAnimationFrame(confettiLoop);
+}
+
+showScreen("hub");
+</script>
+</body>
+</html>

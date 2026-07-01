@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CeraVe – Simplified Luck Game</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Share+Tech+Mono&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html, body {
+    width:100%; height:100%;
+    background:#3a2d8e;
+    font-family: Arial, sans-serif;
+    user-select:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .game-container {
+    width:100vw; height:100vh;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    background:#3a2d8e;
+    position:relative;
+    gap:20px;
+  }
+  .game-container > .headline,
+  .game-container > .timer-panel,
+  .game-container > .press-label,
+  .game-container > .btn-outer,
+  .result-overlay > .res-emoji,
+  .result-overlay > .res-title,
+  .result-overlay > .res-sub,
+  .result-overlay > .res-time,
+  .result-overlay > .try-again {
+    transition:transform 0.55s ease;
+  }
+  .game-container.win-shift > .headline,
+  .game-container.win-shift > .timer-panel,
+  .game-container.win-shift > .press-label,
+  .game-container.win-shift > .btn-outer,
+  .game-container.win-shift .result-overlay > .res-emoji,
+  .game-container.win-shift .result-overlay > .res-title,
+  .game-container.win-shift .result-overlay > .res-sub,
+  .game-container.win-shift .result-overlay > .res-time,
+  .game-container.win-shift .result-overlay > .try-again {
+    transform:translateX(-27vw);
+  }
+
+  /* ── TRY YOUR LUCK ── */
+  .headline h1 {
+    font-family: 'Barlow Condensed', Arial Black, sans-serif;
+    font-weight:900;
+    font-size: clamp(56px, 15vw, 120px);
+    color:#ffffff;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    line-height:0.93;
+    text-align:center;
+  }
+
+  /* ── LED TIMER ── */
+  .timer-panel {
+    background:#0d0d0d;
+    border:3px solid #1a1a1a;
+    border-radius:6px;
+    padding: clamp(8px,1.5vh,16px) clamp(18px,4vw,36px);
+    box-shadow: inset 0 0 16px rgba(0,0,0,0.9), 0 0 24px rgba(255,40,0,0.2);
+  }
+  .timer-display {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(30px, 8vw, 80px);
+    color:#ff2200;
+    letter-spacing:4px;
+    text-shadow: 0 0 6px #ff2200, 0 0 18px rgba(255,34,0,0.7), 0 0 35px rgba(255,34,0,0.3);
+    line-height:1;
+    text-align:center;
+  }
+  .timer-display.win {
+    color:#00ff66;
+    text-shadow: 0 0 8px #00ff66, 0 0 20px rgba(0,255,102,0.8);
+  }
+
+  /* ── PRESS ME label ── */
+  .press-label {
+    font-family: 'Barlow Condensed', Arial, sans-serif;
+    font-weight:700;
+    font-size: clamp(24px, 6.5vw, 62px);
+    color:#ffffff;
+    letter-spacing:4px;
+    text-transform:uppercase;
+    text-align:center;
+  }
+
+  /* ── RED BUTTON ── */
+  .btn-outer { position:relative; }
+  .btn-pulse {
+    position:absolute; inset:-18px; border-radius:50%;
+    background:radial-gradient(circle, rgba(220,0,30,0.45) 0%, transparent 70%);
+    animation:pulse 2s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes pulse {
+    0%,100%{ transform:scale(1); opacity:0.5; }
+    50%    { transform:scale(1.2); opacity:1; }
+  }
+  .press-btn {
+    width: clamp(100px, 25vw, 200px);
+    height: clamp(100px, 25vw, 200px);
+    border-radius:50%;
+    border:none; cursor:pointer;
+    background: radial-gradient(circle at 38% 32%, #ff3355 0%, #cc0022 55%, #880011 100%);
+    box-shadow:
+      0 clamp(5px,1.2vh,10px) 0 #660010,
+      0 clamp(8px,1.8vh,16px) clamp(20px,4vh,40px) rgba(180,0,20,0.6),
+      inset 0 3px 10px rgba(255,255,255,0.3),
+      inset 0 -5px 12px rgba(0,0,0,0.45);
+    transition:transform 0.08s, box-shadow 0.08s;
+    touch-action:manipulation; outline:none;
+  }
+  .press-btn:active {
+    transform:translateY(clamp(4px,1vh,8px));
+    box-shadow:
+      0 2px 0 #660010,
+      0 4px 12px rgba(180,0,20,0.4),
+      inset 0 2px 8px rgba(255,255,255,0.2),
+      inset 0 -2px 8px rgba(0,0,0,0.5);
+  }
+
+  /* ── RESULT OVERLAY ── */
+  .result-overlay {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap: clamp(10px,2.2vh,22px);
+    opacity:0; pointer-events:none;
+    transition:opacity 0.3s; z-index:20;
+    background:rgba(58,45,142,0.9);
+  }
+  .result-overlay.show { opacity:1; pointer-events:all; }
+
+  .res-emoji { font-size:clamp(50px,13vw,100px); animation:popIn 0.4s cubic-bezier(.175,.885,.32,1.275); }
+  @keyframes popIn { 0%{transform:scale(0)} 100%{transform:scale(1)} }
+  .res-title {
+    font-family:'Barlow Condensed',Arial,sans-serif; font-weight:900;
+    font-size:clamp(38px,10vw,90px); letter-spacing:4px; color:#fff;
+    text-align:center; line-height:1;
+  }
+  .res-title.win  { color:#00ff66; text-shadow:0 0 30px #00ff66; }
+  .res-title.lose { color:#ff2200; text-shadow:0 0 30px #ff2200; }
+  .res-sub {
+    font-size:clamp(13px,3.5vw,24px); color:rgba(255,255,255,0.8);
+    text-align:center; max-width:82%; font-weight:700; letter-spacing:1px;
+    font-family:'Barlow Condensed',Arial,sans-serif;
+  }
+  .res-time {
+    font-family:'Share Tech Mono',monospace;
+    font-size:clamp(20px,5vw,40px); color:rgba(255,255,255,0.38); letter-spacing:2px;
+  }
+  .prize-wrap{
+    display:flex;
+    position:fixed;
+    top:0;
+    right:0;
+    width:50vw;
+    height:100vh;
+    align-items:center;
+    justify-content:center;
+    padding: clamp(12px, 2.2vw, 36px);
+    background:transparent;
+    opacity:0;
+    transform:translateX(100%);
+    transition:transform 0.55s ease, opacity 0.45s ease;
+    pointer-events:none;
+    z-index:25;
+  }
+  .prize-wrap.show{
+    opacity:1;
+    transform:translateX(0);
+    pointer-events:none;
+  }
+  .prize-gallery{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:clamp(10px,1.6vw,24px);
+  }
+  .prize-option{
+    max-width:48%;
+    max-height:100vh;
+    width:auto;
+    height:auto;
+    object-fit:contain;
+    animation:prizeFloatA 2.6s ease-in-out infinite;
+    transform-origin:center bottom;
+  }
+  .prize-option.single{
+    max-width:100%;
+    max-height:85vh;
+    animation:prizeTilt 2.8s ease-in-out infinite;
+    transform-origin:center center;
+  }
+  .prize-option.alt{
+    animation-name:prizeFloatB;
+    max-width:44%;
+    max-height:88vh;
+  }
+  @keyframes prizeFloatA{
+    0%,100% { transform:translateY(0) scale(1); }
+    50% { transform:translateY(-10px) scale(1.03); }
+  }
+  @keyframes prizeFloatB{
+    0%,100% { transform:translateY(0) scale(1); }
+    50% { transform:translateY(10px) scale(0.98); }
+  }
+  @keyframes prizeTilt{
+    0%,100% { transform:translateY(0) rotate(-5deg) scale(1); }
+    50% { transform:translateY(-6px) rotate(5deg) scale(1.02); }
+  }
+  .prize-sep{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:clamp(42px,5vw,62px);
+    height:clamp(42px,5vw,62px);
+    border-radius:999px;
+    border:2px solid rgba(255,255,255,0.35);
+    color:#fff;
+    font-family:'Barlow Condensed',Arial,sans-serif;
+    font-weight:900;
+    font-size:clamp(20px,2.6vw,32px);
+    letter-spacing:1px;
+    text-shadow:0 0 8px rgba(255,255,255,0.35);
+    background:rgba(255,255,255,0.12);
+  }
+  @media (max-width: 900px){
+    .game-container.win-shift > .headline,
+    .game-container.win-shift > .timer-panel,
+    .game-container.win-shift > .press-label,
+    .game-container.win-shift > .btn-outer,
+    .game-container.win-shift .result-overlay > .res-emoji,
+    .game-container.win-shift .result-overlay > .res-title,
+    .game-container.win-shift .result-overlay > .res-sub,
+    .game-container.win-shift .result-overlay > .res-time,
+    .game-container.win-shift .result-overlay > .try-again { transform:translateX(-16vw); }
+    .prize-wrap{ width:58vw; }
+  }
+  .try-again {
+    margin-top:4px;
+    background:#3a2d8e; border:2px solid rgba(255,255,255,0.3); color:#fff;
+    font-family:'Barlow Condensed',Arial,sans-serif; font-weight:700;
+    font-size:clamp(18px,4.5vw,32px); letter-spacing:3px;
+    padding: clamp(10px,1.8vh,16px) clamp(28px,7vw,50px);
+    border-radius:50px; cursor:pointer; touch-action:manipulation; outline:none;
+    transition:background 0.2s, transform 0.1s;
+  }
+  .try-again:active { transform:scale(0.95); background:#5040bb; }
+
+  #confetti { position:fixed; inset:0; pointer-events:none; z-index:30; }
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div class="game-container">
+
+  <!-- TRY YOUR LUCK -->
+  <div class="headline">
+    <h1>TRY YOUR<br>LUCK</h1>
+  </div>
+
+  <!-- LED TIMER -->
+  <div class="timer-panel">
+    <div class="timer-display" id="timerDisplay">00:00:00</div>
+  </div>
+
+  <!-- PRESS ME -->
+  <div class="press-label">PRESS ME</div>
+
+  <!-- RED BUTTON -->
+  <div class="btn-outer">
+    <div class="btn-pulse"></div>
+    <button class="press-btn" id="mainBtn"
+      ontouchstart="handlePress(event)"
+      onclick="handlePress(event)">
+    </button>
+  </div>
+
+  <!-- RESULT OVERLAY -->
+  <div class="result-overlay" id="resultOverlay">
+    <div class="res-emoji" id="resEmoji">🎉</div>
+    <div class="res-title" id="resTitle">YOU WIN!</div>
+    <div class="res-sub"   id="resSub">Stopped at exactly 7 or 9.2!</div>
+    <div class="res-time"  id="resTime"></div>
+    <div class="prize-wrap" id="prizeWrap">
+      <div class="prize-gallery" id="prizeGallery"></div>
+    </div>
+    <button class="try-again"
+      ontouchstart="resetGame(event)"
+      onclick="resetGame(event)">TRY AGAIN</button>
+  </div>
+
+</div>
+
+<script>
+  const TARGETS_S = [7, 9.2];
+  const TOLERANCE = 10;
+  const PRIZE_IMAGES = {
+    7: ['images/Game Products-01.png'],
+    9.2: ['images/Game Products-02.png', 'images/Game Products-03.png'],
+  };
+
+  let running=false, startTime=0, elapsed=0, rafId=null;
+
+  const display  = document.getElementById('timerDisplay');
+  const gameContainer = document.querySelector('.game-container');
+  const overlay  = document.getElementById('resultOverlay');
+  const resEmoji = document.getElementById('resEmoji');
+  const resTitle = document.getElementById('resTitle');
+  const resSub   = document.getElementById('resSub');
+  const resTime  = document.getElementById('resTime');
+  const prizeWrap = document.getElementById('prizeWrap');
+  const prizeGallery = document.getElementById('prizeGallery');
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function fmt(ms){
+    const s=Math.floor(ms/1000), m=Math.floor(s/60), ss=s%60, cs=Math.floor((ms%1000)/10);
+    return `${pad(m)}:${pad(ss)}:${pad(cs)}`;
+  }
+
+  function tick(){
+    elapsed = performance.now()-startTime;
+    display.textContent = fmt(elapsed);
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function handlePress(e){
+    e.preventDefault();
+    if(overlay.classList.contains('show')) return;
+    if(!running){
+      running=true; startTime=performance.now();
+      display.classList.remove('win');
+      rafId=requestAnimationFrame(tick);
+    } else {
+      running=false; cancelAnimationFrame(rafId);
+      const nearestTargetMs = TARGETS_S.reduce((best, targetS) => {
+        const targetMs = targetS * 1000;
+        const diff = Math.abs(elapsed - targetMs);
+        return !best || diff < best.diff ? { targetMs, diff } : best;
+      }, null);
+      showResult(nearestTargetMs.diff<=TOLERANCE, elapsed, nearestTargetMs.diff, nearestTargetMs.targetMs);
+    }
+  }
+
+  document.addEventListener('keydown',e=>{
+    if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); handlePress(e); }
+  });
+
+  function showResult(win, ms, diff, targetMs){
+    display.classList.toggle('win', win);
+    overlay.classList.add('show');
+    const targetLabel = (targetMs/1000).toFixed(1).replace(/\.0$/, '');
+    const targetKey = Number(targetLabel);
+    if(win){
+      resEmoji.textContent='🏆';
+      resTitle.textContent='YOU WIN!';
+      resTitle.className='res-title win';
+      resSub.textContent = diff<50 ? `Perfect — exactly ${targetLabel} seconds!` : `Only ${diff}ms off ${targetLabel}s — incredible!`;
+      const candidateImages = PRIZE_IMAGES[targetKey] || [];
+      if(candidateImages.length){
+        prizeGallery.innerHTML = '';
+        if(candidateImages.length === 1){
+          const img = document.createElement('img');
+          img.className = 'prize-option single';
+          img.alt = 'Winner prize';
+          img.src = candidateImages[0];
+          img.onerror = () => {
+            prizeWrap.classList.remove('show');
+            console.warn(`Prize image not found: ${candidateImages[0]}`);
+          };
+          prizeGallery.appendChild(img);
+        } else {
+          candidateImages.slice(0,2).forEach((src, idx) => {
+            const img = document.createElement('img');
+            img.className = `prize-option${idx === 1 ? ' alt' : ''}`;
+            img.alt = `Winner prize option ${idx + 1}`;
+            img.src = src;
+            img.onerror = () => {
+              img.style.display = 'none';
+              console.warn(`Prize image not found: ${src}`);
+            };
+            prizeGallery.appendChild(img);
+            if(idx === 0){
+              const sep = document.createElement('div');
+              sep.className = 'prize-sep';
+              sep.textContent = 'OR';
+              prizeGallery.appendChild(sep);
+            }
+          });
+        }
+        prizeWrap.classList.add('show');
+        gameContainer.classList.add('win-shift');
+      }
+      launchConfetti();
+    } else {
+      const over = elapsed > targetMs;
+      resEmoji.textContent = over ? '⏩' : '⏪';
+      resTitle.textContent = 'SO CLOSE!';
+      resTitle.className   = 'res-title lose';
+      resSub.textContent   = over
+        ? `Too late by ${(diff/1000).toFixed(2)}s — try again!`
+        : `Too early by ${(diff/1000).toFixed(2)}s — try again!`;
+      prizeWrap.classList.remove('show');
+      prizeGallery.innerHTML = '';
+      gameContainer.classList.remove('win-shift');
+    }
+    resTime.textContent = fmt(ms);
+  }
+
+  function resetGame(e){
+    if(e) e.preventDefault();
+    cancelAnimationFrame(rafId);
+    running=false; elapsed=0;
+    display.textContent='00:00:00';
+    display.classList.remove('win');
+    overlay.classList.remove('show');
+    prizeWrap.classList.remove('show');
+    prizeGallery.innerHTML = '';
+    gameContainer.classList.remove('win-shift');
+  }
+
+  // Confetti
+  const canvas=document.getElementById('confetti');
+  const ctx=canvas.getContext('2d');
+  let parts=[];
+  function launchConfetti(){
+    canvas.width=innerWidth; canvas.height=innerHeight;
+    parts=Array.from({length:180},()=>({
+      x:Math.random()*canvas.width, y:-20,
+      w:6+Math.random()*10, h:3+Math.random()*6,
+      color:['#ffe600','#00e676','#ffffff','#ff4060','#a78bfa','#3a2d8e','#38bdf8'][Math.floor(Math.random()*7)],
+      rot:Math.random()*360, vx:(Math.random()-.5)*5,
+      vy:3+Math.random()*6, vr:(Math.random()-.5)*10,
+    }));
+    confettiLoop();
+  }
+  function confettiLoop(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    parts=parts.filter(p=>p.y<canvas.height+40);
+    parts.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.vy+=0.1;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    });
+    if(parts.length) requestAnimationFrame(confettiLoop);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+</script>
+</body>
+</html>

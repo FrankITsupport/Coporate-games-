@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#041d13">
+  <title>GAME IKO ON Arcade</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <div class="stadium-bg" aria-hidden="true">
+      <div class="light light-left"></div>
+      <div class="light light-right"></div>
+      <div class="crowd-dots"></div>
+      <div class="pitch-lines"></div>
+    </div>
+
+    <header class="topbar">
+      <button class="campaign-lockup" type="button" data-action="home" aria-label="Go to arcade home">
+        <span class="campaign-kicker">M-PESA GlobalPay presents</span>
+        <span class="campaign-title">GAME IKO <i>ON</i></span>
+      </button>
+      <div class="brand-lockup" aria-label="M-PESA and Visa">
+        <span class="mpesa-mark">m-pesa</span>
+        <span class="brand-divider"></span>
+        <span class="visa-mark">VISA</span>
+      </div>
+      <div class="top-actions">
+        <button class="icon-button" type="button" data-action="leaderboard" aria-label="Open leaderboard">🏆</button>
+        <button class="icon-button" type="button" data-action="settings" aria-label="Open settings">⚙</button>
+        <button id="fullscreenButton" class="icon-button" type="button" aria-label="Enter fullscreen">⛶</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="attractScreen" class="screen attract-screen active" aria-labelledby="attractTitle">
+        <div class="hero-copy">
+          <p class="eyebrow">THE FOOTBALL ARCADE EXPERIENCE</p>
+          <h1 id="attractTitle">Your game.<br><span>Your moment.</span></h1>
+          <p class="hero-subtitle">Step onto the pitch, challenge your friends and climb the GAME IKO ON leaderboard.</p>
+          <button class="primary-button hero-cta" type="button" data-action="enter-arcade">Tap to play <span>→</span></button>
+        </div>
+        <div class="portal-stage" aria-hidden="true">
+          <div class="portal-halo"></div>
+          <div class="portal-ring ring-back"></div>
+          <div class="portal-ring ring-front"></div>
+          <div class="trophy">
+            <div class="trophy-cup">◆</div>
+            <div class="trophy-stem"></div>
+            <div class="trophy-base"></div>
+          </div>
+          <div class="football"><img src="assets/football-branded.png" alt=""></div>
+          <div class="portal-shadow"></div>
+        </div>
+        <div class="attract-footer">
+          <span>⚽ 4 challenges</span><span>● Offline arcade</span><span>🏆 Live leaderboard</span>
+        </div>
+      </section>
+
+      <section id="hubScreen" class="screen hub-screen" aria-labelledby="hubTitle">
+        <div class="hub-heading">
+          <div>
+            <p class="eyebrow">CHOOSE YOUR CHALLENGE</p>
+            <h1 id="hubTitle">The pitch is yours.</h1>
+          </div>
+          <button id="playerPill" class="player-pill" type="button" data-action="player-menu">
+            <span class="player-avatar">?</span>
+            <span><small>PLAYER</small><strong>Sign in</strong></span>
+          </button>
+        </div>
+
+        <div class="game-grid">
+          <article class="game-card golden-card is-live" data-game="golden-goal">
+            <div class="card-number">01</div>
+            <div class="card-art goal-art" aria-hidden="true">
+              <div class="mini-goal"><i></i><i></i><i></i></div>
+              <div class="mini-ball"><img src="assets/football-branded.png" alt=""></div>
+            </div>
+            <div class="card-status live-status">PLAY NOW</div>
+            <h2>Golden Goal</h2>
+            <p>Swipe, strike and find the corners before the clock runs out.</p>
+            <div class="card-meta"><span>1 player</span><span>45 sec</span><span>Skill</span></div>
+            <button class="card-button" type="button" data-play="golden-goal">Play challenge <span>→</span></button>
+          </article>
+
+          <article class="game-card world-card is-live" data-game="world-tour">
+            <div class="card-number">02</div>
+            <div class="card-art globe-art" aria-hidden="true"><div class="globe">✦</div><i></i><i></i><i></i></div>
+            <div class="card-status live-status">PLAY NOW</div>
+            <h2>GlobalPay World Tour</h2>
+            <p>Make your way to the final through fast global payment challenges.</p>
+            <div class="card-meta"><span>1 player</span><span>60 sec</span><span>Speed</span></div>
+            <button class="card-button" type="button" data-play="world-tour">Play challenge <span>→</span></button>
+          </article>
+
+          <article class="game-card rush-card is-live" data-game="trophy-rush">
+            <div class="card-number">03</div>
+            <div class="card-art rush-art" aria-hidden="true"><span>★</span><span>●</span><span>◆</span></div>
+            <div class="card-status live-status">PLAY NOW</div>
+            <h2>Trophy Rush</h2>
+            <p>Collect glory, dodge the red cards and power up your run.</p>
+            <div class="card-meta"><span>1 player</span><span>45 sec</span><span>Arcade</span></div>
+            <button class="card-button" type="button" data-play="trophy-rush">Play challenge <span>→</span></button>
+          </article>
+
+          <article class="game-card versus-card is-live" data-game="showdown">
+            <div class="card-number">04</div>
+            <div class="card-art versus-art" aria-hidden="true"><b>1</b><div><span></span></div><b>2</b></div>
+            <div class="card-status live-status">PLAY NOW</div>
+            <h2>Goal Line Showdown</h2>
+            <p>Two players. One ball. Tap fast and take control of the pitch.</p>
+            <div class="card-meta"><span>2 players</span><span>45 sec</span><span>Versus</span></div>
+            <button class="card-button" type="button" data-play="showdown">Start face-off <span>→</span></button>
+          </article>
+        </div>
+      </section>
+
+      <section id="gameScreen" class="screen game-screen" aria-label="Golden Goal game">
+        <div class="game-hud">
+          <button class="hud-exit" type="button" data-action="leave-game">← EXIT</button>
+          <div class="hud-player"><span id="hudPlayer">PLAYER</span><small>GOLDEN GOAL</small></div>
+          <div class="hud-stat"><small>TIME</small><strong id="hudTime">45</strong></div>
+          <div class="hud-stat"><small>SCORE</small><strong id="hudScore">0</strong></div>
+          <div class="hud-stat combo-stat"><small>COMBO</small><strong id="hudCombo">×1</strong></div>
+          <button class="hud-pause" type="button" data-action="pause-game">Ⅱ</button>
+        </div>
+        <div id="goalArena" class="goal-arena">
+          <div class="arena-lights"></div>
+          <div class="goal-frame">
+            <div class="goal-net"></div>
+            <div id="targetLayer" class="target-layer"></div>
+            <div id="keeper" class="keeper"><span class="keeper-head"></span><span class="keeper-body"></span><i></i><i></i></div>
+          </div>
+          <div class="penalty-spot"></div>
+          <div id="gameBall" class="game-ball"><img src="assets/football-branded.png" alt="Safaricom and Visa branded football" draggable="false"></div>
+          <div id="feedbackLayer" class="feedback-layer"></div>
+        </div>
+      </section>
+
+      <section id="worldGameScreen" class="screen game-screen world-game-screen" aria-label="GlobalPay World Tour game">
+        <div class="game-hud world-hud">
+          <button class="hud-exit" type="button" data-action="leave-game">← EXIT</button>
+          <div class="hud-player"><span id="worldHudPlayer">PLAYER</span><small>GLOBALPAY WORLD TOUR</small></div>
+          <div class="hud-stat"><small>TIME</small><strong id="worldHudTime">60</strong></div>
+          <div class="hud-stat"><small>SCORE</small><strong id="worldHudScore">0</strong></div>
+          <div class="hud-stat combo-stat"><small>STREAK</small><strong id="worldHudCombo">×1</strong></div>
+          <button class="hud-pause" type="button" data-action="pause-game">Ⅱ</button>
+        </div>
+        <div id="worldArena" class="world-arena">
+          <div class="world-map" aria-hidden="true">
+            <div class="continent north-america"></div><div class="continent south-america"></div>
+            <div class="continent europe"></div><div class="continent africa"></div><div class="continent asia"></div>
+            <div id="routeLine" class="route-line"></div>
+            <div id="mapPins" class="map-pins"></div>
+          </div>
+          <div class="world-progress-panel">
+            <p>NEXT DESTINATION</p>
+            <h2 id="destinationCity">NEW YORK</h2>
+            <div><span id="destinationCountry">USA</span><strong id="destinationCurrency">USD</strong></div>
+          </div>
+          <div class="passport-progress" id="passportProgress"></div>
+          <div class="payment-console">
+            <div class="virtual-card">
+              <div class="card-top"><span>m-pesa</span><strong>VISA</strong></div>
+              <div class="card-chip"></div>
+              <p>GLOBALPAY</p><small>VIRTUAL VISA CARD</small>
+            </div>
+            <div class="payment-terminal">
+              <div class="terminal-screen">
+                <small>PAYMENT IN</small>
+                <strong id="terminalCurrency">USD</strong>
+                <span id="terminalAmount">$24.00</span>
+              </div>
+              <div id="payTrack" class="pay-track">
+                <div id="perfectZone" class="perfect-zone"><span>PERFECT</span></div>
+                <div id="scanMarker" class="scan-marker"></div>
+              </div>
+              <p id="paymentPrompt">Tap when the signal reaches green</p>
+              <button id="payNowButton" class="pay-now-button" type="button">TAP TO PAY <span>◉</span></button>
+            </div>
+          </div>
+          <div id="worldFeedback" class="world-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="rushGameScreen" class="screen game-screen rush-game-screen" aria-label="Trophy Rush game">
+        <div class="game-hud rush-hud">
+          <button class="hud-exit" type="button" data-action="leave-game">← EXIT</button>
+          <div class="hud-player"><span id="rushHudPlayer">PLAYER</span><small>TROPHY RUSH</small></div>
+          <div class="hud-stat"><small>TIME</small><strong id="rushHudTime">45</strong></div>
+          <div class="hud-stat"><small>SCORE</small><strong id="rushHudScore">0</strong></div>
+          <div class="hud-stat combo-stat"><small>COMBO</small><strong id="rushHudCombo">×1</strong></div>
+          <button class="hud-pause" type="button" data-action="pause-game">Ⅱ</button>
+        </div>
+        <div id="rushArena" class="rush-arena">
+          <div class="stadium-lights-row" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="rush-scoreboard"><span>ROAD TO GLORY</span><strong id="rushDistance">0m</strong></div>
+          <div class="runner-pitch">
+            <div class="lane-line line-one"></div><div class="lane-line line-two"></div>
+            <div id="rushItemLayer" class="rush-item-layer"></div>
+            <div id="rushBall" class="rush-player lane-1"><img src="assets/football-branded.png" alt="Branded football" draggable="false"></div>
+          </div>
+          <div class="rush-power-bar">
+            <div id="shieldIndicator" class="power-indicator"><span>◇</span><div><small>VISA SHIELD</small><strong>INACTIVE</strong></div></div>
+            <div id="multiplierIndicator" class="power-indicator"><span>×2</span><div><small>GLOBALPAY BOOST</small><strong>INACTIVE</strong></div></div>
+          </div>
+          <div class="lane-controls" aria-label="Lane controls">
+            <button id="rushLeftButton" type="button" aria-label="Move left">←</button>
+            <span>SWIPE OR TAP</span>
+            <button id="rushRightButton" type="button" aria-label="Move right">→</button>
+          </div>
+          <div id="rushFeedback" class="rush-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="showdownGameScreen" class="screen game-screen showdown-game-screen" aria-label="Goal Line Showdown multiplayer game">
+        <div class="showdown-hud">
+          <button class="hud-exit" type="button" data-action="leave-game">← EXIT</button>
+          <div class="showdown-player-hud player-one-hud"><small>PLAYER 1</small><strong id="showdownNameOne">PLAYER 1</strong><span id="showdownGoalsOne">0</span></div>
+          <div class="showdown-clock"><small>MATCH TIME</small><strong id="showdownTime">45</strong></div>
+          <div class="showdown-player-hud player-two-hud"><span id="showdownGoalsTwo">0</span><div><small>PLAYER 2</small><strong id="showdownNameTwo">PLAYER 2</strong></div></div>
+          <button class="hud-pause" type="button" data-action="pause-game">Ⅱ</button>
+        </div>
+        <div id="showdownArena" class="showdown-arena">
+          <div class="showdown-side showdown-left">
+            <div class="side-watermark">01</div>
+            <p><span>SAFARICOM GREEN</span> TAP YOUR TARGETS</p>
+            <div id="showdownTargetsOne" class="showdown-target-layer"></div>
+            <div class="showdown-goal goal-left"><i></i><span>GOAL</span></div>
+          </div>
+          <div class="showdown-side showdown-right">
+            <div class="side-watermark">02</div>
+            <p>TAP YOUR TARGETS <span>VISA NAVY</span></p>
+            <div id="showdownTargetsTwo" class="showdown-target-layer"></div>
+            <div class="showdown-goal goal-right"><i></i><span>GOAL</span></div>
+          </div>
+          <div class="showdown-midline"><span>VS</span></div>
+          <div class="momentum-panel">
+            <div class="momentum-labels"><span id="showdownComboOne">×1</span><strong>MOMENTUM</strong><span id="showdownComboTwo">×1</span></div>
+            <div id="momentumTrack" class="momentum-track">
+              <div class="momentum-green"></div><div class="momentum-navy"></div>
+              <div id="showdownBall" class="showdown-ball"><img src="assets/football-branded.png" alt="Match football" draggable="false"></div>
+            </div>
+          </div>
+          <div id="showdownFeedback" class="showdown-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+
+    <div id="modalBackdrop" class="modal-backdrop" aria-hidden="true"></div>
+
+    <section id="registrationModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="registrationTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
+      <p class="eyebrow">PLAYER REGISTRATION</p>
+      <h2 id="registrationTitle">What should we call you?</h2>
+      <p class="modal-copy">Use a unique name. Returning players can select their name from the leaderboard.</p>
+      <form id="registrationForm" autocomplete="off">
+        <label class="field-label" for="playerNameInput">PLAYER NAME</label>
+        <input id="playerNameInput" class="name-input" type="text" maxlength="20" autocomplete="off" placeholder="ENTER NAME" required>
+        <p id="nameError" class="form-error" role="alert"></p>
+        <button class="primary-button full-button" type="submit">Enter the arcade <span>→</span></button>
+      </form>
+      <button class="text-button" type="button" data-action="open-returning">Already played? Find your name</button>
+    </section>
+
+    <section id="instructionsModal" class="modal wide-modal" role="dialog" aria-modal="true" aria-labelledby="instructionsTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
+      <p class="eyebrow">HOW TO PLAY</p>
+      <h2 id="instructionsTitle">Golden Goal</h2>
+      <div class="instruction-grid">
+        <div class="instruction-step"><span class="step-icon">◎</span><strong>Find the target</strong><p>Watch for targets appearing inside the goal.</p></div>
+        <div class="instruction-step"><span class="step-icon">↗</span><strong>Swipe to shoot</strong><p>Swipe the ball toward your chosen target.</p></div>
+        <div class="instruction-step"><span class="step-icon">×3</span><strong>Build your combo</strong><p>Score consecutive goals for a bigger multiplier.</p></div>
+        <div class="instruction-step danger-step"><span class="step-icon">▰</span><strong>Avoid red cards</strong><p>They break your combo and deduct points.</p></div>
+      </div>
+      <div class="difficulty-picker" role="radiogroup" aria-label="Select difficulty">
+        <button type="button" data-difficulty="easy"><strong>Easy</strong><small>Relaxed targets</small></button>
+        <button class="selected" type="button" data-difficulty="standard"><strong>Standard</strong><small>Event mode</small></button>
+        <button type="button" data-difficulty="pro"><strong>Pro</strong><small>Fast &amp; fierce</small></button>
+      </div>
+      <button id="startGoldenGoal" class="primary-button full-button" type="button">Start game <span>→</span></button>
+    </section>
+
+    <section id="worldInstructionsModal" class="modal wide-modal" role="dialog" aria-modal="true" aria-labelledby="worldInstructionsTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
+      <p class="eyebrow">HOW TO PLAY</p>
+      <h2 id="worldInstructionsTitle">GlobalPay World Tour</h2>
+      <div class="instruction-grid">
+        <div class="instruction-step"><span class="step-icon">◎</span><strong>Watch the signal</strong><p>The payment signal moves across the terminal.</p></div>
+        <div class="instruction-step"><span class="step-icon">◉</span><strong>Tap inside green</strong><p>Time your payment inside the approval window.</p></div>
+        <div class="instruction-step"><span class="step-icon">✈</span><strong>Unlock destinations</strong><p>Every successful tap moves your world tour forward.</p></div>
+        <div class="instruction-step"><span class="step-icon">×3</span><strong>Build a streak</strong><p>Perfect payments multiply your score.</p></div>
+      </div>
+      <div class="difficulty-picker world-difficulty-picker" role="radiogroup" aria-label="Select difficulty">
+        <button type="button" data-world-difficulty="easy"><strong>Easy</strong><small>Wide pay window</small></button>
+        <button class="selected" type="button" data-world-difficulty="standard"><strong>Standard</strong><small>Event mode</small></button>
+        <button type="button" data-world-difficulty="pro"><strong>Pro</strong><small>Fast signal</small></button>
+      </div>
+      <button id="startWorldTour" class="primary-button full-button" type="button">Begin world tour <span>→</span></button>
+    </section>
+
+    <section id="rushInstructionsModal" class="modal wide-modal" role="dialog" aria-modal="true" aria-labelledby="rushInstructionsTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
+      <p class="eyebrow">HOW TO PLAY</p>
+      <h2 id="rushInstructionsTitle">Trophy Rush</h2>
+      <div class="instruction-grid">
+        <div class="instruction-step"><span class="step-icon">↔</span><strong>Change lanes</strong><p>Swipe or tap the arrows to move your football.</p></div>
+        <div class="instruction-step"><span class="step-icon">♛</span><strong>Collect glory</strong><p>Catch trophies and gold tokens to build your score.</p></div>
+        <div class="instruction-step"><span class="step-icon">◇</span><strong>Use power-ups</strong><p>Visa shields protect you and GlobalPay doubles points.</p></div>
+        <div class="instruction-step danger-step"><span class="step-icon">▰</span><strong>Dodge trouble</strong><p>Avoid red cards and defenders—they break your combo.</p></div>
+      </div>
+      <div class="difficulty-picker rush-difficulty-picker" role="radiogroup" aria-label="Select difficulty">
+        <button type="button" data-rush-difficulty="easy"><strong>Easy</strong><small>Slower pitch</small></button>
+        <button class="selected" type="button" data-rush-difficulty="standard"><strong>Standard</strong><small>Event mode</small></button>
+        <button type="button" data-rush-difficulty="pro"><strong>Pro</strong><small>Finals pace</small></button>
+      </div>
+      <button id="startTrophyRush" class="primary-button full-button" type="button">Start the rush <span>→</span></button>
+    </section>
+
+    <section id="showdownSetupModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="showdownSetupTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
+      <p class="eyebrow">TWO-PLAYER MATCH</p>
+      <h2 id="showdownSetupTitle">Choose your sides.</h2>
+      <p class="modal-copy">Enter a new unique name or reuse an existing leaderboard name.</p>
+      <form id="showdownSetupForm" autocomplete="off">
+        <div class="versus-name-fields">
+          <label><span><i>1</i> SAFARICOM GREEN</span><input id="showdownPlayerOneInput" class="name-input" type="text" maxlength="20" autocomplete="off" placeholder="PLAYER 1" required></label>
+          <div class="versus-badge">VS</div>
+          <label><span><i>2</i> VISA NAVY</span><input id="showdownPlayerTwoInput" class="name-input" type="text" maxlength="20" autocomplete="off" placeholder="PLAYER 2" required></label>
+        </div>
+        <p id="showdownSetupError" class="form-error" role="alert"></p>
+        <button class="primary-button full-button" type="submit">Continue to instructions <span>→</span></button>
+      </form>
+    </section>
+
+    <section id="showdownInstructionsModal" class="modal wide-modal" role="dialog" aria-modal="true" aria-labelledby="showdownInstructionsTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
+      <p class="eyebrow">HOW TO PLAY TOGETHER</p>
+      <h2 id="showdownInstructionsTitle">Goal Line Showdown</h2>
+      <div class="instruction-grid">
+        <div class="instruction-step"><span class="step-icon">1｜2</span><strong>Own your side</strong><p>Each player taps targets only on their half.</p></div>
+        <div class="instruction-step"><span class="step-icon">⚽</span><strong>Push the football</strong><p>Every correct hit drives the ball toward your opponent.</p></div>
+        <div class="instruction-step"><span class="step-icon">⚡</span><strong>Use power shots</strong><p>Gold targets create a stronger momentum swing.</p></div>
+        <div class="instruction-step danger-step"><span class="step-icon">▰</span><strong>Avoid red cards</strong><p>They reverse your momentum and break your combo.</p></div>
+      </div>
+      <div class="difficulty-picker showdown-difficulty-picker" role="radiogroup" aria-label="Select difficulty">
+        <button type="button" data-showdown-difficulty="friendly"><strong>Friendly</strong><small>Large targets</small></button>
+        <button class="selected" type="button" data-showdown-difficulty="standard"><strong>Standard</strong><small>Event mode</small></button>
+        <button type="button" data-showdown-difficulty="finals"><strong>Finals</strong><small>Fast face-off</small></button>
+      </div>
+      <button id="startShowdown" class="primary-button full-button" type="button">Kick off <span>→</span></button>
+    </section>
+
+    <section id="leaderboardModal" class="modal leaderboard-modal" role="dialog" aria-modal="true" aria-labelledby="leaderboardTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
+      <div class="leaderboard-heading"><div><p id="leaderboardGameLabel" class="eyebrow">GOLDEN GOAL</p><h2 id="leaderboardTitle">Leaderboard</h2></div><div class="player-count"><strong id="playerCount">0</strong><small>PLAYERS</small></div></div>
+      <div class="leaderboard-tabs"><button class="selected" type="button" data-leaderboard-game="golden-goal">Golden Goal</button><button type="button" data-leaderboard-game="world-tour">World Tour</button><button type="button" data-leaderboard-game="trophy-rush">Trophy Rush</button><button type="button" data-leaderboard-game="showdown">Showdown</button></div>
+      <div class="leaderboard-tools"><input id="leaderboardSearch" type="search" placeholder="Search player name"><span>Top 50 shown</span></div>
+      <div id="leaderboardList" class="leaderboard-list"></div>
+      <p class="leaderboard-help">Tap a player name to continue as that player.</p>
+    </section>
+
+    <section id="settingsModal" class="modal settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
+      <p class="eyebrow">EVENT CONTROLS</p><h2 id="settingsTitle">Settings</h2>
+      <div class="setting-row"><div><strong>Sound effects</strong><small>Game feedback and stadium sounds</small></div><label class="switch"><input id="soundSetting" type="checkbox" checked><span></span></label></div>
+      <div class="setting-row"><div><strong>Round duration</strong><small>Golden Goal play time</small></div><select id="durationSetting"><option value="30">30 seconds</option><option value="45" selected>45 seconds</option><option value="60">60 seconds</option></select></div>
+      <div class="setting-row"><div><strong>Idle attract mode</strong><small>Return home after inactivity</small></div><select id="idleSetting"><option value="60">1 minute</option><option value="120" selected>2 minutes</option><option value="300">5 minutes</option></select></div>
+      <button id="saveSettings" class="primary-button full-button" type="button">Save settings</button>
+      <button id="resetDataButton" class="danger-button" type="button">Reset all player data</button>
+    </section>
+
+    <section id="confirmPlayerModal" class="modal compact-modal" role="dialog" aria-modal="true" aria-labelledby="confirmPlayerTitle">
+      <p class="eyebrow">WELCOME BACK</p><h2 id="confirmPlayerTitle">Continue as PLAYER?</h2>
+      <p id="confirmPlayerStats" class="modal-copy"></p>
+      <div class="modal-actions"><button class="secondary-button" type="button" data-close-modal>Cancel</button><button id="confirmPlayerButton" class="primary-button" type="button">Continue</button></div>
+    </section>
+
+    <section id="countdownModal" class="countdown-modal" aria-live="assertive"><span id="countdownValue">3</span></section>
+
+    <section id="pauseModal" class="modal compact-modal" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+      <p class="eyebrow">MATCH PAUSED</p><h2 id="pauseTitle">Catch your breath.</h2>
+      <div class="modal-actions"><button class="secondary-button" type="button" data-action="leave-game">Exit</button><button class="primary-button" type="button" data-action="resume-game">Resume</button></div>
+    </section>
+
+    <section id="resultModal" class="modal result-modal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+      <p id="resultGameLabel" class="eyebrow">FULL TIME</p><h2 id="resultTitle">Great strike!</h2>
+      <div class="result-score"><small>FINAL SCORE</small><strong id="finalScore">0</strong></div>
+      <div class="result-stats"><div><small>RANK</small><strong id="finalRank">#—</strong></div><div><small>BEST COMBO</small><strong id="finalCombo">×1</strong></div><div><small>PERSONAL BEST</small><strong id="personalBest">0</strong></div></div>
+      <p id="improvementMessage" class="improvement-message"></p>
+      <div class="modal-actions"><button class="secondary-button" type="button" data-action="result-home">Arcade home</button><button class="primary-button" type="button" data-action="replay">Play again</button></div>
+    </section>
+
+    <section id="showdownResultModal" class="modal showdown-result-modal" role="dialog" aria-modal="true" aria-labelledby="showdownResultTitle">
+      <p class="eyebrow">FULL TIME</p><h2 id="showdownResultTitle">What a match!</h2>
+      <p id="showdownWinner" class="showdown-winner">PLAYER 1 WINS</p>
+      <div class="showdown-final-score">
+        <div><small id="showdownResultNameOne">PLAYER 1</small><strong id="showdownResultGoalsOne">0</strong><span id="showdownResultHitsOne">0 hits</span></div>
+        <b>—</b>
+        <div><small id="showdownResultNameTwo">PLAYER 2</small><strong id="showdownResultGoalsTwo">0</strong><span id="showdownResultHitsTwo">0 hits</span></div>
+      </div>
+      <div class="modal-actions"><button class="secondary-button" type="button" data-action="result-home">Arcade home</button><button class="primary-button" type="button" data-action="showdown-rematch">Rematch</button></div>
+    </section>
+
+    <section id="postGameModal" class="modal post-game-modal" role="dialog" aria-modal="true" aria-labelledby="postGameTitle">
+      <p id="postGameLabel" class="eyebrow">GAME COMPLETE</p>
+      <h2 id="postGameTitle">You’re on the board!</h2>
+      <div id="postGameSummary" class="post-game-summary"></div>
+      <div class="post-board-heading"><div><strong>Leaderboard</strong><small id="postBoardGame">GOLDEN GOAL</small></div><span>TOP 10 + YOUR POSITION</span></div>
+      <div id="postLeaderboardList" class="leaderboard-list post-leaderboard-list"></div>
+      <div class="queue-actions">
+        <button id="postNewPlayerButton" class="secondary-button" type="button"><small>NEXT IN QUEUE</small><strong>New player</strong></button>
+        <button id="postContinueButton" class="primary-button" type="button"><small>KEEP PLAYING</small><strong>Continue</strong></button>
+      </div>
+    </section>
+
+    <div id="toast" class="toast" role="status"></div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/games/golden-goal.js"></script>
+  <script src="js/games/world-tour.js"></script>
+  <script src="js/games/trophy-rush.js"></script>
+  <script src="js/games/showdown.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

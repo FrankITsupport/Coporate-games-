@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cipla Word Search Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== CIPLA BRAND VARIABLES ===== */
+:root {
+  --orange:       #E04F0A;
+  --orange-light: #F26722;
+  --navy:         #0057A8;
+  --navy-light:   #1A78CF;
+  --white:        #FFFFFF;
+  --gray-bg:      #F4F5F7;
+  --gray-dark:    #888888;
+  --success:      #27AE60;
+  --danger:       #E74C3C;
+  --warning:      #F39C12;
+  --found-bg:     rgba(39,174,96,0.18);
+  --found-text:   #1A6B36;
+  --select-bg:    rgba(224,79,10,0.30);
+  --cell-size:    38px;
+  --font:         'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--gray-bg); min-height: 100vh; overflow-x: hidden; }
+button { cursor: pointer; font-family: var(--font); }
+input { font-family: var(--font); }
+
+/* ===== SCREENS ===== */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ===== WELCOME ===== */
+.welcome-wrap { text-align: center; max-width: 440px; width: 100%; }
+.logo-mark {
+  font-family: 'Poppins', sans-serif;
+  font-size: 78px; font-weight: 800;
+  color: #ffffff;
+  font-style: normal;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+.logo-tagline { color: rgba(255,255,255,0.55); font-size: 13px; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+.game-title { color: var(--white); font-size: 26px; font-weight: 600; margin: 28px 0 8px; }
+.game-subtitle { color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 32px; }
+.name-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.name-form input {
+  padding: 14px 20px; border-radius: 12px; border: 2px solid transparent;
+  font-size: 16px; outline: none; background: rgba(255,255,255,0.1); color: white; transition: all .2s;
+}
+.name-form input::placeholder { color: rgba(255,255,255,0.45); }
+.name-form input:focus { border-color: var(--orange-light); background: rgba(255,255,255,0.18); }
+.name-feedback { min-height: 18px; font-size: 13px; }
+.name-feedback.error  { color: #FF8080; }
+.name-feedback.info   { color: #80D0FF; }
+.welcome-row { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+  background: var(--orange); color: white; border: none;
+  padding: 14px 32px; border-radius: 12px; font-size: 16px; font-weight: 600;
+  transition: all .2s; width: 100%;
+}
+.btn-primary:hover { background: var(--orange-light); transform: translateY(-2px); box-shadow: 0 4px 18px rgba(224,79,10,0.45); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: transparent; color: var(--white); border: 2px solid rgba(255,255,255,0.35);
+  padding: 10px 22px; border-radius: 12px; font-size: 14px; font-weight: 500; transition: all .2s;
+}
+.btn-secondary:hover { border-color: var(--orange-light); color: var(--orange-light); }
+
+.btn-ghost {
+  background: transparent; color: rgba(255,255,255,0.65); border: 2px solid rgba(255,255,255,0.25);
+  padding: 10px 16px; border-radius: 10px; font-size: 15px; transition: all .2s;
+}
+.btn-ghost:hover { border-color: var(--orange-light); color: var(--orange-light); }
+
+.btn-back {
+  background: none; border: none; color: var(--navy-light); font-size: 14px;
+  padding: 8px 0; display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 16px; transition: color .2s;
+}
+.btn-back:hover { color: var(--orange); }
+
+.btn-dark-back {
+  background: none; border: none; color: rgba(255,255,255,0.5); font-size: 14px;
+  padding: 8px 0; display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 16px; transition: color .2s;
+}
+.btn-dark-back:hover { color: var(--orange-light); }
+
+/* ===== DIFFICULTY ===== */
+/* #screen-difficulty removed — now a modal */
+.diff-wrap { max-width: 820px; width: 100%; text-align: center; }
+.diff-wrap h2 { font-size: 30px; color: var(--navy); margin-bottom: 32px; }
+.diff-cards { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
+.diff-card {
+  background: white; border-radius: 16px; padding: 28px 22px; width: 230px;
+  border: 2px solid transparent; box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  transition: all .2s; position: relative; text-align: left;
+}
+.diff-card:hover { border-color: var(--orange-light); transform: translateY(-4px); box-shadow: 0 8px 24px rgba(224,79,10,0.15); }
+.diff-card.featured { border-color: var(--orange); }
+.diff-badge {
+  position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+  background: var(--orange); color: white; font-size: 11px; font-weight: 700;
+  padding: 4px 14px; border-radius: 20px; white-space: nowrap;
+}
+.diff-icon { font-size: 38px; margin-bottom: 10px; }
+.diff-card h3 { font-size: 20px; color: var(--navy); margin-bottom: 12px; }
+.diff-card ul { list-style: none; margin-bottom: 20px; }
+.diff-card ul li { font-size: 13px; color: #666; padding: 3px 0; }
+.diff-card ul li::before { content: '✓  '; color: var(--orange); font-weight: bold; }
+.btn-diff {
+  background: var(--orange); color: white; border: none;
+  padding: 10px 0; border-radius: 10px; font-size: 14px; font-weight: 600;
+  width: 100%; transition: background .2s;
+}
+.btn-diff:hover { background: var(--orange-light); }
+
+/* ===== GAME SCREEN ===== */
+#screen-game { background: #003278; height: 100vh; overflow: hidden; }
+
+/* ── Top control bar ── */
+.game-bar {
+  background: #004A92;
+  padding: 7px 18px;
+  display: flex; align-items: center; gap: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0; z-index: 5; position: relative;
+}
+.gb-player { display: flex; align-items: center; gap: 8px; margin-right: 8px; }
+.h-avatar {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: 13px; flex-shrink: 0;
+}
+.h-name { color: rgba(255,255,255,0.85); font-weight: 600; font-size: 13px; }
+.gb-divider { width: 1px; height: 28px; background: rgba(255,255,255,0.15); }
+.gb-stat { display: flex; align-items: center; gap: 6px; }
+.gb-lbl { font-size: 9px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 1px; }
+.gb-val { font-size: 18px; font-weight: 700; color: white; }
+#h-timer { font-family: 'Courier New', monospace; color: #6EFFB0; }
+#h-timer.warn  { color: var(--warning); animation: blink 1s infinite; }
+#h-timer.alarm { color: var(--danger);  animation: blink .5s infinite; }
+.multiplier-tag {
+  background: var(--warning); color: white; font-size: 10px; font-weight: 700;
+  padding: 1px 7px; border-radius: 20px; animation: pop .3s ease;
+}
+.hidden { display: none !important; }
+.gb-progress-wrap {
+  flex: 1; max-width: 120px; height: 5px;
+  background: rgba(255,255,255,0.15); border-radius: 3px; overflow: hidden;
+}
+#progress-fill { height: 100%; background: var(--orange-light); border-radius: 3px; transition: width .4s ease; }
+.gb-right { margin-left: auto; display: flex; gap: 7px; }
+.btn-sm-icon {
+  background: transparent; color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.2);
+  padding: 5px 10px; border-radius: 7px; font-size: 14px; transition: all .2s;
+}
+.btn-sm-icon:hover { color: var(--orange-light); border-color: var(--orange-light); }
+
+/* ── Image stage ── */
+.game-stage {
+  flex: 1;
+  min-height: 0;
+  background: #003278;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Canvas fits the space between header and footer — never clipped */
+.game-canvas {
+  position: relative;
+  /* Use full width, but never taller than the stage */
+  width: min(100%, calc((100vh - 84px) * 16 / 9));
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* ── Footer bar ── */
+.game-footer {
+  flex-shrink: 0;
+  height: 40px;
+  background: #003278;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 18px;
+}
+.gf-brand {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.5px;
+}
+.gf-brand strong {
+  font-family: 'Poppins', sans-serif;
+  color: var(--orange-light);
+  font-style: normal;
+  font-weight: 900;
+  margin-right: 4px;
+}
+
+.game-bg {
+  display: block;
+  width: 100%; height: 100%;
+  object-fit: fill; /* stretch to exactly fill the 16:9 canvas */
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Grid overlay — covers the letter-grid area of the image ── */
+/*   Measured from the actual images: grid occupies ~left 57% of image,
+     with ~1.3% margin on left/right of that panel, ~2.5% top, ~2.5% bottom */
+.grid-overlay {
+  position: absolute;
+  left:   1.3%;
+  top:    2.5%;
+  width:  55.5%;
+  height: 95%;
+  display: flex;
+  align-items: stretch;
+}
+
+#word-grid {
+  display: grid;
+  width: 100%; height: 100%;
+  gap: 1px;
+  background: #8C94A5; /* fully opaque grid-line colour */
+  user-select: none;
+  touch-action: none;
+}
+
+.cell {
+  background: #ffffff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800;
+  font-size: clamp(9px, 1.55vw, 17px);
+  color: #0057A8;
+  cursor: pointer;
+  transition: background .1s, color .1s;
+  min-width: 0; min-height: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.cell:hover     { background: #fff0e4; }
+.cell.selecting { background: #ffcda0; color: #C03800; }
+.cell.found     { background: #b4f0c8; color: #1A6B36; }
+.cell.hint      { background: #fff3c8; }
+.cell.wrong-flash { background: #f5c0bb; }
+
+/* word list overlay removed — image provides the word list visually */
+
+/* ===== GAME OVER ===== */
+.go-wrap { text-align: center; max-width: 420px; width: 100%; }
+.go-icon { font-size: 76px; margin-bottom: 16px; }
+.go-title { font-size: 38px; color: white; font-weight: 700; margin-bottom: 8px; }
+.go-sub { font-size: 15px; color: rgba(255,255,255,0.65); margin-bottom: 28px; }
+.score-breakdown {
+  background: rgba(255,255,255,0.09); border-radius: 14px;
+  padding: 20px 24px; margin-bottom: 24px; text-align: left;
+}
+.bd-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.75); font-size: 14px;
+}
+.bd-row:last-child { border-bottom: none; }
+.bd-row.total { color: white; font-size: 20px; font-weight: 700; padding-top: 14px; }
+.go-btns { display: flex; flex-direction: column; gap: 12px; }
+
+/* ===== LEADERBOARD ===== */
+.lb-wrap { max-width: 620px; width: 100%; }
+.lb-wrap h2 { font-size: 28px; color: var(--navy); margin-bottom: 20px; text-align: center; }
+.lb-filters { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+.f-btn {
+  background: white; border: 2px solid transparent; padding: 7px 18px;
+  border-radius: 20px; font-size: 13px; font-weight: 600; color: #999;
+  transition: all .2s;
+}
+.f-btn.active { border-color: var(--orange); color: var(--orange); background: rgba(224,79,10,0.06); }
+#lb-list { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 14px rgba(0,0,0,0.07); margin-bottom: 8px; }
+.lb-row {
+  display: flex; align-items: center; padding: 13px 18px;
+  border-bottom: 1px solid #f0f0f0; gap: 14px; transition: background .15s;
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-row:hover { background: #fafafa; }
+.lb-row.me { background: rgba(224,79,10,0.05); }
+.lb-rank { width: 30px; text-align: center; font-weight: 700; color: #ccc; font-size: 17px; flex-shrink: 0; }
+.lb-rank.gold   { color: #FFD700; }
+.lb-rank.silver { color: #B0B0B0; }
+.lb-rank.bronze { color: #CD7F32; }
+.lb-av {
+  width: 40px; height: 40px; border-radius: 50%; background: var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: 16px; flex-shrink: 0;
+}
+.lb-info { flex: 1; min-width: 0; }
+.lb-name  { font-weight: 600; color: var(--navy); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-meta  { font-size: 12px; color: #aaa; margin-top: 1px; }
+.lb-diff  { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+.lb-diff.easy   { background: rgba(39,174,96,0.15);  color: #27AE60; }
+.lb-diff.medium { background: rgba(243,156,18,0.15); color: #E67E22; }
+.lb-diff.hard   { background: rgba(231,76,60,0.15);  color: #E74C3C; }
+.lb-score { font-size: 22px; font-weight: 700; color: var(--orange); flex-shrink: 0; }
+.lb-empty { padding: 48px; text-align: center; color: #bbb; font-size: 14px; }
+
+/* ===== MODALS ===== */
+.modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
+.modal-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+
+/* Full-screen overlay variants — game is visible (blurred) behind them */
+.modal-full .modal-bg { background: rgba(0,50,120,0.78); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+
+.modal-box.modal-welcome-box {
+  background: linear-gradient(140deg, var(--navy) 0%, var(--navy-light) 60%, #2a5080 100%);
+  max-width: 440px; padding: 40px 32px; text-align: center;
+}
+.modal-box.modal-difficulty-box {
+  background: var(--gray-bg); max-width: 860px; padding: 40px 32px; text-align: center;
+  max-height: 88vh; overflow-y: auto;
+}
+/* two-panel end-game: score left + leaderboard right */
+.modal-box.modal-endgame-box {
+  max-width: 960px; width: 94%; padding: 0; gap: 0;
+  display: flex; overflow: hidden; max-height: 88vh;
+}
+.endgame-score {
+  flex: 0 0 340px;
+  background: linear-gradient(140deg, var(--navy) 0%, var(--navy-light) 100%);
+  padding: 36px 28px; text-align: center;
+  display: flex; flex-direction: column; overflow-y: auto;
+}
+.endgame-lb {
+  flex: 1; background: var(--gray-bg);
+  padding: 32px 24px; overflow-y: auto;
+  border-left: 1px solid rgba(0,0,0,0.07);
+}
+.endgame-lb h2 { font-size: 22px; color: var(--navy); margin-bottom: 16px; text-align: center; }
+@media(max-width:700px) {
+  .modal-box.modal-endgame-box { flex-direction: column; }
+  .endgame-score { flex: none; }
+}
+.modal-box.modal-leaderboard-box {
+  background: var(--gray-bg); max-width: 620px; padding: 36px 28px;
+  max-height: 88vh; overflow-y: auto;
+}
+.modal-box {
+  position: relative; background: white; border-radius: 16px;
+  padding: 24px; width: 90%; max-width: 400px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.22); z-index: 1;
+}
+.modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.modal-head h3 { font-size: 19px; color: var(--navy); }
+.btn-close {
+  background: none; border: none; font-size: 19px; color: #aaa;
+  padding: 4px 8px; border-radius: 6px; transition: all .2s;
+}
+.btn-close:hover { background: #f0f0f0; color: var(--navy); }
+.sett-group { margin-bottom: 20px; }
+.sett-group > .sett-label { display: block; font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 9px; }
+.radio-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.radio-row label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px; color: #555; }
+input[type="range"] { width: 100%; accent-color: var(--orange); margin: 6px 0; }
+.slider-ends { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; }
+/* Toggle */
+.toggle-wrap { display: flex; align-items: center; gap: 10px; }
+.toggle-label { font-size: 14px; color: #555; }
+.toggle { position: relative; width: 46px; height: 26px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  position: absolute; inset: 0; background: #ccc; border-radius: 13px; transition: background .2s; cursor: pointer;
+}
+.toggle-track::after {
+  content: ''; position: absolute; width: 20px; height: 20px;
+  background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform .2s;
+}
+.toggle input:checked ~ .toggle-track { background: var(--orange); }
+.toggle input:checked ~ .toggle-track::after { transform: translateX(20px); }
+.modal-footer { margin-top: 20px; padding-top: 16px; border-top: 1px solid #eee; }
+.pause-btns { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.sett-note { font-size: 11px; color: #aaa; margin-top: 6px; }
+
+/* ===== WELCOME-BACK MODAL (name exists) ===== */
+.wb-name { color: var(--orange); font-weight: 700; }
+.wb-score { font-size: 28px; font-weight: 700; color: var(--navy); margin: 12px 0 4px; }
+.wb-diff-badge { display: inline-block; margin-bottom: 16px; }
+.wb-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.btn-outline-navy {
+  background: transparent; color: var(--navy); border: 2px solid var(--navy);
+  padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; transition: all .2s;
+}
+.btn-outline-navy:hover { background: var(--navy); color: white; }
+
+/* ===== TOAST ===== */
+#toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(0);
+  background: var(--navy); color: white; padding: 11px 22px; border-radius: 24px;
+  font-size: 14px; font-weight: 600; z-index: 300; white-space: nowrap;
+  animation: slideUp .25s ease;
+}
+#toast.success { background: var(--success); }
+#toast.danger  { background: var(--danger); }
+#toast.warning { background: var(--warning); }
+
+/* ===== ANIMATIONS ===== */
+@keyframes blink  { 0%,100%{opacity:1} 50%{opacity:0.45} }
+@keyframes pop    { 0%{transform:scale(.7)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+@keyframes slideUp{ from{transform:translateX(-50%) translateY(20px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:700px){
+  .diff-cards { flex-direction: column; align-items: center; }
+  .game-stage { background: #003278; }
+}
+
+/* ── Compact game bar on small/landscape phones ── */
+@media(max-width:700px) and (orientation:landscape){
+  .game-bar { padding: 4px 10px; gap: 8px; }
+  .gb-lbl   { display: none; }
+  .gb-val   { font-size: 14px; }
+  .h-name   { display: none; }
+  .gb-divider { display: none; }
+  .gb-progress-wrap { max-width: 70px; }
+}
+
+/* ── Portrait lock overlay ── */
+#portrait-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 9999;
+  background: #0C2340;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 20px; text-align: center; padding: 32px;
+}
+#portrait-overlay .po-icon {
+  font-size: 64px;
+  animation: rotate-hint 2s ease-in-out infinite;
+}
+#portrait-overlay .po-title {
+  color: white; font-size: 22px; font-weight: 700;
+}
+#portrait-overlay .po-sub {
+  color: rgba(255,255,255,0.55); font-size: 14px; line-height: 1.5;
+}
+#portrait-overlay .po-brand {
+  font-family: 'Poppins', sans-serif;
+  color: var(--orange-light); font-style: normal; font-size: 28px; font-weight: 900;
+  margin-bottom: 8px;
+}
+@keyframes rotate-hint {
+  0%, 100% { transform: rotate(0deg); }
+  40%       { transform: rotate(90deg); }
+  60%       { transform: rotate(90deg); }
+}
+@media(orientation:portrait) and (max-width:900px){
+  #portrait-overlay { display: flex; }
+}
+</style>
+</head>
+<body>
+
+<!-- ======================== WELCOME MODAL ======================== -->
+<div id="modal-welcome" class="modal modal-full">
+  <div class="modal-bg"></div>
+  <div class="modal-box modal-welcome-box">
+    <div class="logo-mark">Cipla</div>
+    <div class="logo-tagline">making every life thrive</div>
+    <h1 class="game-title">Word Search Challenge</h1>
+    <p class="game-subtitle">Find all the hidden words before time runs out!</p>
+    <div class="name-form">
+      <input type="text" id="inp-name" placeholder="Enter your nickname" maxlength="20" autocomplete="off">
+      <div id="name-feedback" class="name-feedback"></div>
+      <button class="btn-primary" id="btn-start">Start Game</button>
+    </div>
+    <div class="welcome-row">
+      <button class="btn-secondary" id="btn-lb-home">🏆 Leaderboard</button>
+      <button class="btn-ghost" id="btn-sett-home">⚙️ Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== DIFFICULTY MODAL ======================== -->
+<div id="modal-difficulty" class="modal modal-full hidden">
+  <div class="modal-bg"></div>
+  <div class="modal-box modal-difficulty-box">
+    <h2>Select Difficulty</h2>
+    <div class="diff-cards">
+      <div class="diff-card">
+        <div class="diff-icon">😊</div>
+        <h3>Easy</h3>
+        <ul>
+          <li>10 minutes</li>
+          <li>Horizontal &amp; Vertical</li>
+          <li>First letter highlighted</li>
+          <li>Word list visible</li>
+        </ul>
+        <button class="btn-diff" data-diff="easy">Play Easy</button>
+      </div>
+      <div class="diff-card featured">
+        <div class="diff-badge">Recommended</div>
+        <div class="diff-icon">🎯</div>
+        <h3>Medium</h3>
+        <ul>
+          <li>5 minutes</li>
+          <li>+ Diagonal words</li>
+          <li>No hints</li>
+          <li>Word list visible</li>
+        </ul>
+        <button class="btn-diff" data-diff="medium">Play Medium</button>
+      </div>
+      <div class="diff-card">
+        <div class="diff-icon">🔥</div>
+        <h3>Hard</h3>
+        <ul>
+          <li>3 minutes</li>
+          <li>All directions + backwards</li>
+          <li>No hints</li>
+          <li>Word list hidden</li>
+        </ul>
+        <button class="btn-diff" data-diff="hard">Play Hard</button>
+      </div>
+    </div>
+    <button class="btn-back" id="btn-back-diff">← Back</button>
+  </div>
+</div>
+
+<!-- ======================== GAME SCREEN ======================== -->
+<div id="screen-game" class="screen active">
+
+  <!-- Slim control bar -->
+  <div class="game-bar">
+    <div class="gb-player">
+      <div class="h-avatar" id="h-avatar">?</div>
+      <div class="h-name"   id="h-name">Player</div>
+    </div>
+    <div class="gb-divider"></div>
+    <div class="gb-stat">
+      <span class="gb-lbl">SCORE&nbsp;</span>
+      <span class="gb-val" id="h-score">0</span>
+    </div>
+    <div class="gb-divider"></div>
+    <div class="gb-stat">
+      <span class="gb-lbl">STREAK&nbsp;</span>
+      <span class="gb-val" id="h-streak">0</span>
+      <span class="multiplier-tag hidden" id="h-mult" style="margin-left:4px">2×</span>
+    </div>
+    <div class="gb-divider"></div>
+    <div class="gb-stat">
+      <span class="gb-lbl">TIME&nbsp;</span>
+      <span class="gb-val" id="h-timer">05:00</span>
+    </div>
+    <div class="gb-divider"></div>
+    <div class="gb-stat">
+      <span class="gb-lbl">WORDS&nbsp;</span>
+      <span class="gb-val"><span id="p-found">0</span><span style="font-size:13px;opacity:.6"> / </span><span id="p-total" style="font-size:13px;opacity:.6">0</span></span>
+    </div>
+    <div class="gb-divider"></div>
+    <div class="gb-progress-wrap">
+      <div id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="gb-right">
+      <button class="btn-sm-icon" id="btn-pause">⏸</button>
+      <button class="btn-sm-icon" id="btn-sett-game">⚙️</button>
+    </div>
+  </div>
+
+  <!-- Image stage: full puzzle image as background -->
+  <div class="game-stage">
+    <div class="game-canvas" id="game-canvas">
+
+      <!-- The actual puzzle image -->
+      <img id="game-bg-img" class="game-bg" src="" alt="">
+
+      <!-- Interactive grid — overlaid on the image grid area only -->
+      <div class="grid-overlay">
+        <div id="word-grid"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer bar — keeps the image from being clipped at the bottom -->
+  <div class="game-footer">
+    <span class="gf-brand"><strong>Cipla</strong> making every life thrive</span>
+  </div>
+</div>
+
+<!-- ======================== END-GAME MODAL (score + leaderboard side by side) ======================== -->
+<div id="modal-endgame" class="modal modal-full hidden">
+  <div class="modal-bg"></div>
+  <div class="modal-box modal-endgame-box">
+
+    <!-- Left: score summary -->
+    <div class="endgame-score">
+      <div class="go-icon"  id="go-icon">🎉</div>
+      <div class="go-title" id="go-title">Excellent!</div>
+      <div class="go-sub"   id="go-sub">You found all words!</div>
+      <div class="score-breakdown">
+        <div class="bd-row"><span>Words Found</span><span id="bd-words">—</span></div>
+        <div class="bd-row"><span>Base Score</span><span id="bd-base">—</span></div>
+        <div class="bd-row"><span>Time Bonuses</span><span id="bd-time">—</span></div>
+        <div class="bd-row"><span>Streak Bonuses</span><span id="bd-streak">—</span></div>
+        <div class="bd-row"><span>Time Remaining</span><span id="bd-remain">—</span></div>
+        <div class="bd-row total"><span>Final Score</span><span id="bd-total">0</span></div>
+      </div>
+      <div class="go-btns" style="margin-top:auto;padding-top:20px;">
+        <button class="btn-primary"      id="btn-play-again">Play Again</button>
+        <button class="btn-outline-navy" id="btn-menu-go" style="color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.35);">🏠 Back to Menu</button>
+      </div>
+    </div>
+
+    <!-- Right: leaderboard -->
+    <div class="endgame-lb">
+      <h2>🏆 Leaderboard</h2>
+      <div class="lb-filters" id="endgame-lb-filters">
+        <button class="f-btn active" data-filter="all">All</button>
+        <button class="f-btn" data-filter="easy">Easy</button>
+        <button class="f-btn" data-filter="medium">Medium</button>
+        <button class="f-btn" data-filter="hard">Hard</button>
+      </div>
+      <div id="endgame-lb-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ======================== LEADERBOARD MODAL ======================== -->
+<div id="modal-leaderboard" class="modal modal-full hidden">
+  <div class="modal-bg"></div>
+  <div class="modal-box modal-leaderboard-box">
+    <div class="lb-wrap">
+      <h2>🏆 Leaderboard</h2>
+      <div class="lb-filters">
+        <button class="f-btn active" data-filter="all">All</button>
+        <button class="f-btn" data-filter="easy">Easy</button>
+        <button class="f-btn" data-filter="medium">Medium</button>
+        <button class="f-btn" data-filter="hard">Hard</button>
+      </div>
+      <div id="lb-list"></div>
+      <button class="btn-back" id="btn-back-lb">← Back to Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SETTINGS MODAL ======================== -->
+<div class="modal hidden" id="modal-settings">
+  <div class="modal-bg" id="sett-bg"></div>
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>⚙️ Settings</h3>
+      <button class="btn-close" id="btn-close-sett">✕</button>
+    </div>
+    <div class="sett-group">
+      <span class="sett-label">Default Difficulty</span>
+      <div class="radio-row">
+        <label><input type="radio" name="sett-diff" value="easy"> Easy</label>
+        <label><input type="radio" name="sett-diff" value="medium" checked> Medium</label>
+        <label><input type="radio" name="sett-diff" value="hard"> Hard</label>
+      </div>
+    </div>
+    <div class="sett-group">
+      <span class="sett-label">Custom Timer: <strong id="sett-timer-lbl">5 min</strong></span>
+      <input type="range" id="sett-timer" min="1" max="15" value="5">
+      <div class="slider-ends"><span>1 min</span><span>15 min</span></div>
+      <div class="sett-note">Overrides the difficulty default timer</div>
+    </div>
+    <div class="sett-group">
+      <div class="toggle-wrap">
+        <label class="toggle"><input type="checkbox" id="sett-sound" checked><span class="toggle-track"></span></label>
+        <span class="toggle-label">Sound Effects</span>
+      </div>
+    </div>
+    <div class="sett-group">
+      <div class="toggle-wrap">
+        <label class="toggle"><input type="checkbox" id="sett-wlist" checked><span class="toggle-track"></span></label>
+        <span class="toggle-label">Show Word List (Easy &amp; Medium)</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" id="btn-save-sett">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== PAUSE MODAL ======================== -->
+<div class="modal hidden" id="modal-pause">
+  <div class="modal-bg" id="pause-bg"></div>
+  <div class="modal-box" style="text-align:center;">
+    <h3 style="font-size:22px;color:var(--navy);">⏸ Game Paused</h3>
+    <div class="pause-btns">
+      <button class="btn-primary" id="btn-resume">▶ Resume</button>
+      <button class="btn-outline-navy" id="btn-quit">🏠 Quit to Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== WELCOME-BACK MODAL ======================== -->
+<div class="modal hidden" id="modal-wb">
+  <div class="modal-bg" id="wb-bg"></div>
+  <div class="modal-box" style="text-align:center;">
+    <div style="font-size:40px;margin-bottom:8px;">👋</div>
+    <h3 style="font-size:20px;color:var(--navy);margin-bottom:6px;">Welcome back, <span class="wb-name" id="wb-name-lbl"></span>!</h3>
+    <p style="font-size:13px;color:#888;margin-bottom:4px;">Your best score on the leaderboard:</p>
+    <div class="wb-score" id="wb-score-lbl">0</div>
+    <span class="lb-diff wb-diff-badge" id="wb-diff-lbl">medium</span>
+    <p style="font-size:13px;color:#666;margin-top:12px;">Play again to beat your score!</p>
+    <div class="wb-btns">
+      <button class="btn-primary" id="btn-wb-continue">Continue as this name</button>
+      <button class="btn-outline-navy" id="btn-wb-change">Choose a different name</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== TOAST ======================== -->
+<div id="toast" class="hidden"></div>
+
+<script>
+/* ====================================================
+   DATA
+   ==================================================== */
+const PUZZLE_SETS = {
+  A: {
+    name: 'Cipla Values',
+    words: ['EXCELLENCE','PEOPLE','GLOBAL','HUMANITY','EMPATHY','INTEGRITY',
+            'LEADERSHIP','IMPACT','COMPASSION','SERVICE','PURPOSE','TRUSTED','CARING']
+  },
+  B: {
+    name: 'Healthcare',
+    words: ['COMPASSION','INNOVATION','PATIENT','LIFE','ACCESS','CARING',
+            'AFFORDABLE','RESEARCH','INTEGRITY','NURSE','GENERICS',
+            'OXYGEN','RELIEF','IMMUNITY','FUTURE','EXCELLENCE']
+  }
+};
+
+const PUZZLE_CONFIGS = [
+  { id:1, set:'A' }, { id:2, set:'B' }, { id:3, set:'B' },
+  { id:4, set:'A' }, { id:5, set:'B' }
+];
+
+const DIFF_CFG = {
+  easy:   { label:'Easy',   secs:600, size:15, dirs:[[0,1],[1,0]],                                          hints:true,  wlist:true  },
+  medium: { label:'Medium', secs:300, size:16, dirs:[[0,1],[1,0],[1,1],[1,-1]],                              hints:false, wlist:true  },
+  hard:   { label:'Hard',   secs:180, size:16, dirs:[[0,1],[1,0],[1,1],[1,-1],[0,-1],[-1,0],[-1,-1],[-1,1]],hints:false, wlist:false }
+};
+
+/* ====================================================
+   WORD SEARCH GENERATOR
+   ==================================================== */
+function generateGrid(words, size, dirs) {
+  const grid = Array.from({length:size}, () => Array(size).fill(''));
+  const placed = [];
+  const sorted = [...words].sort((a,b) => b.length - a.length);
+
+  for (const word of sorted) {
+    let ok = false;
+    for (let attempt = 0; attempt < 250 && !ok; attempt++) {
+      const [dr, dc] = dirs[Math.floor(Math.random() * dirs.length)];
+      const minR = dr < 0 ? word.length - 1 : 0;
+      const maxR = dr > 0 ? size - word.length : size - 1;
+      const minC = dc < 0 ? word.length - 1 : 0;
+      const maxC = dc > 0 ? size - word.length : size - 1;
+      if (minR > maxR || minC > maxC) continue;
+      const sr = minR + Math.floor(Math.random() * (maxR - minR + 1));
+      const sc = minC + Math.floor(Math.random() * (maxC - minC + 1));
+      let valid = true;
+      const cells = [];
+      for (let i = 0; i < word.length; i++) {
+        const r = sr + dr * i, c = sc + dc * i;
+        if (r < 0 || r >= size || c < 0 || c >= size) { valid = false; break; }
+        if (grid[r][c] !== '' && grid[r][c] !== word[i]) { valid = false; break; }
+        cells.push({r, c});
+      }
+      if (valid) {
+        cells.forEach((cell, i) => { grid[cell.r][cell.c] = word[i]; });
+        placed.push({ word, cells });
+        ok = true;
+      }
+    }
+  }
+
+  const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (let r = 0; r < size; r++)
+    for (let c = 0; c < size; c++)
+      if (grid[r][c] === '') grid[r][c] = alpha[Math.floor(Math.random() * 26)];
+
+  return { grid, placed };
+}
+
+/* ====================================================
+   LEADERBOARD (localStorage)
+   ==================================================== */
+const LB_KEY = 'cipla_ws_lb_v1';
+
+function lbGet() {
+  try { return JSON.parse(localStorage.getItem(LB_KEY)) || []; }
+  catch { return []; }
+}
+function lbSave(entries) { localStorage.setItem(LB_KEY, JSON.stringify(entries)); }
+
+function lbGetEntry(name) {
+  return lbGet().find(e => e.name.toLowerCase() === name.toLowerCase()) || null;
+}
+
+function lbAddOrUpdate(name, score, diff, found, total) {
+  const entries = lbGet();
+  const idx = entries.findIndex(e => e.name.toLowerCase() === name.toLowerCase());
+  const entry = { name, score, diff, found, total, date: new Date().toLocaleDateString() };
+  if (idx >= 0) {
+    if (score > entries[idx].score) entries[idx] = entry;
+  } else {
+    entries.push(entry);
+  }
+  entries.sort((a,b) => b.score - a.score);
+  lbSave(entries.slice(0, 50));
+}
+
+function lbRender(containerId, filter, currentName) {
+  const container = document.getElementById(containerId);
+  let entries = lbGet();
+  if (filter !== 'all') entries = entries.filter(e => e.diff === filter);
+
+  if (!entries.length) {
+    container.innerHTML = '<div class="lb-empty">No scores yet — be the first!</div>';
+    return;
+  }
+
+  const medals = ['🥇','🥈','🥉'];
+  const rankCls = ['gold','silver','bronze'];
+
+  container.innerHTML = entries.slice(0,25).map((e, i) => {
+    const rank = i + 1;
+    const me = currentName && e.name.toLowerCase() === currentName.toLowerCase();
+    const initial = e.name.charAt(0).toUpperCase();
+    return `<div class="lb-row${me?' me':''}">
+      <div class="lb-rank ${rank<=3?rankCls[rank-1]:''}">${rank<=3?medals[rank-1]:rank}</div>
+      <div class="lb-av" style="background:${avatarColor(e.name)}">${initial}</div>
+      <div class="lb-info">
+        <div class="lb-name">${e.name}${me?' <span style="color:var(--orange);font-size:12px">(You)</span>':''}</div>
+        <div class="lb-meta">${e.found}/${e.total} words · ${e.date}</div>
+      </div>
+      <span class="lb-diff ${e.diff}">${e.diff}</span>
+      <div class="lb-score">${e.score.toLocaleString()}</div>
+    </div>`;
+  }).join('');
+}
+
+function avatarColor(name) {
+  const palette = ['#E04F0A','#3498DB','#9B59B6','#27AE60','#E67E22','#1ABC9C','#2980B9','#C0392B'];
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) & 0xFFFFFF;
+  return palette[Math.abs(h) % palette.length];
+}
+
+/* ====================================================
+   GAME STATE
+   ==================================================== */
+const S = {
+  name: '', diff: 'medium', customTimer: null,
+  soundOn: true, wlistOn: true,
+  // live
+  grid: [], placed: [], words: [], found: new Set(),
+  score: 0, timeLeft: 0, timer: null, paused: false,
+  streak: 0, mult: 1, lastFindMs: null,
+  timeBonusAcc: 0, streakBonusAcc: 0,
+  // selection
+  dragging: false, selCells: [], selStart: null,
+  // session flag
+  registered: false
+};
+
+/* ====================================================
+   SCREEN NAVIGATION  (game screen is always visible; others are modals)
+   ==================================================== */
+const GAME_OVERLAYS = ['modal-welcome','modal-difficulty','modal-endgame','modal-leaderboard'];
+
+function showScreen(id) {
+  GAME_OVERLAYS.forEach(mid => closeModal(mid));
+  if      (id === 'screen-welcome')     openModal('modal-welcome');
+  else if (id === 'screen-difficulty')  openModal('modal-difficulty');
+  else if (id === 'screen-gameover')    openModal('modal-endgame');
+  else if (id === 'screen-leaderboard') openModal('modal-leaderboard');
+  // 'screen-game' → just close all overlays; game canvas is always the base layer
+}
+
+/* ====================================================
+   WELCOME SCREEN
+   ==================================================== */
+document.getElementById('btn-start').addEventListener('click', handleStartClick);
+document.getElementById('inp-name').addEventListener('keydown', e => { if (e.key === 'Enter') handleStartClick(); });
+
+function handleStartClick() {
+  const raw = document.getElementById('inp-name').value.trim();
+  const fb  = document.getElementById('name-feedback');
+
+  if (!raw) { fb.textContent = 'Please enter a nickname.'; fb.className = 'name-feedback error'; return; }
+  if (raw.length < 2) { fb.textContent = 'Nickname must be at least 2 characters.'; fb.className = 'name-feedback error'; return; }
+
+  fb.textContent = ''; fb.className = 'name-feedback';
+  const existing = lbGetEntry(raw);
+
+  if (existing && !S.registered) {
+    // Show welcome-back modal
+    document.getElementById('wb-name-lbl').textContent = existing.name;
+    document.getElementById('wb-score-lbl').textContent = existing.score.toLocaleString();
+    const diffEl = document.getElementById('wb-diff-lbl');
+    diffEl.textContent = existing.diff;
+    diffEl.className = `lb-diff wb-diff-badge ${existing.diff}`;
+    S.name = raw;
+    openModal('modal-wb');
+  } else {
+    S.name = raw;
+    showScreen('screen-difficulty');
+  }
+}
+
+document.getElementById('btn-wb-continue').addEventListener('click', () => {
+  closeModal('modal-wb');
+  showScreen('screen-difficulty');
+});
+document.getElementById('btn-wb-change').addEventListener('click', () => {
+  closeModal('modal-wb');
+  document.getElementById('inp-name').value = '';
+  document.getElementById('inp-name').focus();
+});
+document.getElementById('wb-bg').addEventListener('click', () => closeModal('modal-wb'));
+
+document.getElementById('btn-lb-home').addEventListener('click', () => {
+  lbRender('lb-list', 'all', S.name);
+  showScreen('screen-leaderboard');
+  document.querySelectorAll('.f-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === 'all'));
+});
+
+/* ====================================================
+   DIFFICULTY SELECTION
+   ==================================================== */
+document.querySelectorAll('.btn-diff').forEach(btn => {
+  btn.addEventListener('click', () => startGame(btn.dataset.diff));
+});
+document.getElementById('btn-back-diff').addEventListener('click', () => showScreen('screen-welcome'));
+
+/* ====================================================
+   START GAME
+   ==================================================== */
+function startGame(diff) {
+  S.diff = diff;
+  const cfg  = DIFF_CFG[diff];
+  const pCfg = PUZZLE_CONFIGS[Math.floor(Math.random() * PUZZLE_CONFIGS.length)];
+  const wSet = PUZZLE_SETS[pCfg.set].words;
+
+  // Set the puzzle image matching the chosen puzzle config
+  document.getElementById('game-bg-img').src =
+    `Puzzle images/Cipla - Word search puzzle ${pCfg.id} - Scrn-0${pCfg.id}.jpg`;
+
+  // Generate grid
+  const { grid, placed } = generateGrid(wSet, cfg.size, cfg.dirs);
+  S.grid   = grid;
+  S.placed = placed;
+  S.words  = placed.map(p => p.word);
+  S.found  = new Set();
+
+  // Timer
+  const tSecs = S.customTimer !== null ? S.customTimer * 60 : cfg.secs;
+  S.timeLeft = tSecs;
+
+  // Reset stats
+  S.score = 0; S.streak = 0; S.mult = 1;
+  S.lastFindMs = null; S.timeBonusAcc = 0; S.streakBonusAcc = 0;
+  S.dragging = false; S.selCells = []; S.selStart = null;
+  S.paused = false;
+
+  // Header
+  document.getElementById('h-name').textContent = S.name;
+  const av = document.getElementById('h-avatar');
+  av.textContent = S.name.charAt(0).toUpperCase();
+  av.style.background = avatarColor(S.name);
+
+  renderGrid();
+  renderWordList();
+  updateScore();
+  updateTimer();
+
+  if (diff === 'easy' && cfg.hints) applyHints();
+
+  showScreen('screen-game');
+  clearInterval(S.timer);
+  S.timer = setInterval(tick, 1000);
+}
+
+/* ====================================================
+   GRID RENDER
+   ==================================================== */
+function renderGrid() {
+  const el = document.getElementById('word-grid');
+  const size = S.grid.length;
+  // Use 1fr so cells auto-size to fill the image grid overlay area
+  el.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+  el.style.gridTemplateRows    = `repeat(${size}, 1fr)`;
+  el.innerHTML = '';
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.textContent = S.grid[r][c];
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+      cell.addEventListener('mousedown',  onMD);
+      cell.addEventListener('mouseenter', onME);
+      cell.addEventListener('touchstart', onTS, {passive:false});
+      cell.addEventListener('touchmove',  onTM, {passive:false});
+      el.appendChild(cell);
+    }
+  }
+  document.addEventListener('mouseup',  onMU);
+  document.addEventListener('touchend', onTE);
+}
+
+function cellEl(r, c) { return document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`); }
+
+function applyHints() {
+  S.placed.forEach(pw => {
+    if (!S.found.has(pw.word)) {
+      const el = cellEl(pw.cells[0].r, pw.cells[0].c);
+      if (el) el.classList.add('hint');
+    }
+  });
+}
+
+/* ====================================================
+   WORD LIST — word panel removed; image shows the words.
+   We only track found state for toast/score and update the bar.
+   ==================================================== */
+function renderWordList() {
+  document.getElementById('p-total').textContent = S.words.length;
+  updateProgress();
+}
+
+function updateProgress() {
+  const n = S.found.size, t = S.words.length;
+  document.getElementById('p-found').textContent = n;
+  document.getElementById('progress-fill').style.width = (t ? (n / t * 100) : 0) + '%';
+}
+
+/* ====================================================
+   DRAG SELECTION
+   ==================================================== */
+function onMD(e) { e.preventDefault(); startSel(+e.currentTarget.dataset.r, +e.currentTarget.dataset.c); }
+function onME(e) { if (S.dragging) extendSel(+e.currentTarget.dataset.r, +e.currentTarget.dataset.c); }
+function onMU()  { if (S.dragging) endSel(); }
+
+function onTS(e) {
+  e.preventDefault();
+  const t = e.touches[0], el = document.elementFromPoint(t.clientX, t.clientY);
+  if (el?.classList.contains('cell')) startSel(+el.dataset.r, +el.dataset.c);
+}
+function onTM(e) {
+  e.preventDefault();
+  if (!S.dragging) return;
+  const t = e.touches[0], el = document.elementFromPoint(t.clientX, t.clientY);
+  if (el?.classList.contains('cell')) extendSel(+el.dataset.r, +el.dataset.c);
+}
+function onTE() { if (S.dragging) endSel(); }
+
+function startSel(r, c) {
+  S.dragging = true; S.selStart = {r, c}; S.selCells = [{r, c}];
+  clearSel();
+  const el = cellEl(r, c);
+  if (el && !el.classList.contains('found')) el.classList.add('selecting');
+}
+
+function extendSel(r, c) {
+  if (!S.selStart) return;
+  const {r:sr, c:sc} = S.selStart;
+  const dr = r - sr, dc = c - sc;
+  let stepR = 0, stepC = 0;
+  if (dr === 0 && dc !== 0)                    { stepC = dc > 0 ? 1 : -1; }
+  else if (dc === 0 && dr !== 0)               { stepR = dr > 0 ? 1 : -1; }
+  else if (Math.abs(dr) === Math.abs(dc))      { stepR = dr > 0 ? 1 : -1; stepC = dc > 0 ? 1 : -1; }
+  else return;
+  const dist = Math.max(Math.abs(dr), Math.abs(dc));
+  const cells = [];
+  for (let i = 0; i <= dist; i++) cells.push({r: sr + stepR*i, c: sc + stepC*i});
+  clearSel();
+  S.selCells = cells;
+  cells.forEach(({r, c}) => { const el = cellEl(r, c); if (el && !el.classList.contains('found')) el.classList.add('selecting'); });
+}
+
+function endSel() {
+  S.dragging = false;
+  if (S.selCells.length < 2) { clearSel(); S.selCells = []; S.selStart = null; return; }
+  checkSelection();
+  S.selCells = []; S.selStart = null;
+}
+
+function clearSel() { document.querySelectorAll('.cell.selecting').forEach(el => el.classList.remove('selecting')); }
+
+function checkSelection() {
+  const selKey    = S.selCells.map(({r,c}) => `${r},${c}`).join('|');
+  const selKeyRev = [...S.selCells].reverse().map(({r,c}) => `${r},${c}`).join('|');
+  const match = S.placed.find(pw => {
+    const k = pw.cells.map(({r,c}) => `${r},${c}`).join('|');
+    return k === selKey || k === selKeyRev;
+  });
+  if (match && !S.found.has(match.word)) {
+    wordFound(match.word, match.cells);
+  } else {
+    // Wrong selection
+    const cells = [...S.selCells];
+    clearSel();
+    cells.forEach(({r,c}) => {
+      const el = cellEl(r,c);
+      if (el) {
+        el.classList.add('wrong-flash');
+        setTimeout(() => el.classList.remove('wrong-flash'), 400);
+      }
+    });
+    wrongSelection();
+  }
+}
+
+/* ====================================================
+   WORD FOUND
+   ==================================================== */
+function wordFound(word, cells) {
+  S.found.add(word);
+
+  cells.forEach(({r,c}) => {
+    const el = cellEl(r,c);
+    if (el) { el.classList.remove('selecting','hint'); el.classList.add('found'); }
+  });
+
+  const now = Date.now();
+  const elapsed = S.lastFindMs ? (now - S.lastFindMs) / 1000 : null;
+
+  // Streak
+  if (elapsed !== null && elapsed < 15) {
+    S.streak++;
+    if (S.streak >= 3) { S.mult = 2; document.getElementById('h-mult').classList.remove('hidden'); }
+  } else {
+    S.streak = 1; S.mult = 1;
+    document.getElementById('h-mult').classList.add('hidden');
+  }
+  S.lastFindMs = now;
+  document.getElementById('h-streak').textContent = S.streak;
+
+  // Score
+  const base = 100;
+  const tBonus = Math.max(0, Math.floor(50 - (elapsed ?? 50)));
+  const wordBase = base + tBonus;
+  const sBonus = wordBase * (S.mult - 1);
+  const pts = wordBase * S.mult;
+  S.timeBonusAcc   += tBonus;
+  S.streakBonusAcc += sBonus;
+  S.score += pts;
+
+  updateScore();
+  document.getElementById(`wi-${word}`)?.classList.add('found');
+  updateProgress();
+
+  let msg = `+${pts.toLocaleString()} — ${word}!`;
+  if (S.mult > 1) msg += ' 🔥 2× Streak!';
+  toast(msg, 'success');
+  playSound('found');
+
+  if (S.found.size === S.words.length) setTimeout(gameWin, 500);
+}
+
+/* ====================================================
+   WRONG SELECTION
+   ==================================================== */
+function wrongSelection() {
+  const pen = 10;
+  S.score = Math.max(0, S.score - pen);
+  S.streak = 0; S.mult = 1;
+  document.getElementById('h-streak').textContent = 0;
+  document.getElementById('h-mult').classList.add('hidden');
+  updateScore();
+  toast(`-${pen} pts — try again!`, 'danger');
+  playSound('wrong');
+}
+
+/* ====================================================
+   TIMER
+   ==================================================== */
+function tick() {
+  if (S.paused) return;
+  S.timeLeft--;
+  updateTimer();
+  if (S.timeLeft <= 0) { clearInterval(S.timer); gameOver(); }
+}
+
+function updateTimer() {
+  const m = Math.floor(S.timeLeft / 60), s = S.timeLeft % 60;
+  const el = document.getElementById('h-timer');
+  el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className = S.timeLeft <= 30 ? 'h-stat-val alarm' : S.timeLeft <= 60 ? 'h-stat-val warn' : 'h-stat-val';
+}
+
+function updateScore() { document.getElementById('h-score').textContent = S.score.toLocaleString(); }
+
+/* ====================================================
+   PAUSE
+   ==================================================== */
+document.getElementById('btn-pause').addEventListener('click', () => { S.paused = true; openModal('modal-pause'); });
+document.getElementById('btn-resume').addEventListener('click', () => { S.paused = false; closeModal('modal-pause'); });
+document.getElementById('pause-bg').addEventListener('click', () => { S.paused = false; closeModal('modal-pause'); });
+document.getElementById('btn-quit').addEventListener('click', () => {
+  clearInterval(S.timer);
+  closeModal('modal-pause');
+  showScreen('screen-welcome');
+});
+
+/* ====================================================
+   WIN / LOSE
+   ==================================================== */
+function gameWin() {
+  clearInterval(S.timer);
+  const remBonus = S.timeLeft * 2;
+  S.score += remBonus;
+  lbAddOrUpdate(S.name, S.score, S.diff, S.found.size, S.words.length);
+  S.registered = true;
+  showGameOver(true, remBonus);
+  playSound('win');
+}
+
+function gameOver() {
+  clearInterval(S.timer);
+  if (S.found.size > 0) {
+    lbAddOrUpdate(S.name, S.score, S.diff, S.found.size, S.words.length);
+    S.registered = true;
+  }
+  showGameOver(false, 0);
+  playSound('lose');
+}
+
+function showGameOver(win, remBonus) {
+  document.getElementById('go-icon').textContent  = win ? '🎉' : '⏰';
+  document.getElementById('go-title').textContent = win ? 'Excellent!' : "Time's Up!";
+  document.getElementById('go-sub').textContent   = win
+    ? `You found all ${S.words.length} words!`
+    : `You found ${S.found.size} of ${S.words.length} words.`;
+
+  const base = S.found.size * 100;
+  document.getElementById('bd-words').textContent  = `${S.found.size} / ${S.words.length}`;
+  document.getElementById('bd-base').textContent   = `+${base.toLocaleString()}`;
+  document.getElementById('bd-time').textContent   = `+${S.timeBonusAcc.toLocaleString()}`;
+  document.getElementById('bd-streak').textContent = `+${S.streakBonusAcc.toLocaleString()}`;
+  document.getElementById('bd-remain').textContent = `+${remBonus.toLocaleString()}`;
+  document.getElementById('bd-total').textContent  = S.score.toLocaleString();
+
+  // Render leaderboard in the embedded right panel, then open the combined modal
+  lbRender('endgame-lb-list', 'all', S.name);
+  document.querySelectorAll('#endgame-lb-filters .f-btn')
+    .forEach(b => b.classList.toggle('active', b.dataset.filter === 'all'));
+  showScreen('screen-gameover');
+}
+
+document.getElementById('btn-play-again').addEventListener('click', () => showScreen('screen-difficulty'));
+document.getElementById('btn-menu-go').addEventListener('click',   () => showScreen('screen-welcome'));
+
+/* ====================================================
+   LEADERBOARD SCREEN + EMBEDDED ENDGAME LEADERBOARD
+   ==================================================== */
+// Standalone leaderboard modal filters
+document.querySelectorAll('#modal-leaderboard .f-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#modal-leaderboard .f-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    lbRender('lb-list', btn.dataset.filter, S.name);
+  });
+});
+document.getElementById('btn-back-lb').addEventListener('click', () => showScreen('screen-welcome'));
+
+// Embedded end-game leaderboard filters
+document.querySelectorAll('#endgame-lb-filters .f-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#endgame-lb-filters .f-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    lbRender('endgame-lb-list', btn.dataset.filter, S.name);
+  });
+});
+
+/* ====================================================
+   SETTINGS
+   ==================================================== */
+function openSettings() {
+  document.querySelector(`input[name="sett-diff"][value="${S.diff}"]`).checked = true;
+  const defMins = DIFF_CFG[S.diff].secs / 60;
+  const slVal = S.customTimer !== null ? S.customTimer : defMins;
+  const slider = document.getElementById('sett-timer');
+  slider.value = slVal;
+  document.getElementById('sett-timer-lbl').textContent = `${slVal} min`;
+  document.getElementById('sett-sound').checked = S.soundOn;
+  document.getElementById('sett-wlist').checked = S.wlistOn;
+  openModal('modal-settings');
+}
+
+document.getElementById('btn-sett-home').addEventListener('click', openSettings);
+document.getElementById('btn-sett-game').addEventListener('click', openSettings);
+document.getElementById('btn-close-sett').addEventListener('click', () => closeModal('modal-settings'));
+document.getElementById('sett-bg').addEventListener('click', () => closeModal('modal-settings'));
+
+document.getElementById('sett-timer').addEventListener('input', function() {
+  document.getElementById('sett-timer-lbl').textContent = `${this.value} min`;
+});
+
+document.querySelectorAll('input[name="sett-diff"]').forEach(r => {
+  r.addEventListener('change', function() {
+    const defMins = DIFF_CFG[this.value].secs / 60;
+    document.getElementById('sett-timer').value = defMins;
+    document.getElementById('sett-timer-lbl').textContent = `${defMins} min`;
+    document.getElementById('sett-wlist').checked = (this.value !== 'hard');
+  });
+});
+
+document.getElementById('btn-save-sett').addEventListener('click', () => {
+  const selDiff = document.querySelector('input[name="sett-diff"]:checked').value;
+  const slVal   = parseInt(document.getElementById('sett-timer').value);
+  const defMins = DIFF_CFG[selDiff].secs / 60;
+  S.diff        = selDiff;
+  S.customTimer = slVal !== defMins ? slVal : null;
+  S.soundOn     = document.getElementById('sett-sound').checked;
+  S.wlistOn     = document.getElementById('sett-wlist').checked;
+  closeModal('modal-settings');
+  toast('Settings saved!');
+});
+
+/* ====================================================
+   MODAL HELPERS
+   ==================================================== */
+function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+/* ====================================================
+   TOAST
+   ==================================================== */
+let _toastT;
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = type || '';
+  clearTimeout(_toastT);
+  _toastT = setTimeout(() => el.className = 'hidden', 2600);
+}
+
+/* ====================================================
+   SOUND (Web Audio API)
+   ==================================================== */
+function playSound(type) {
+  if (!S.soundOn) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    const cfg = {
+      found: { freq:880, dur:0.14, shape:'sine'    },
+      wrong: { freq:220, dur:0.20, shape:'sawtooth' },
+      win:   { freq:660, dur:0.60, shape:'sine'    },
+      lose:  { freq:140, dur:0.45, shape:'sawtooth' }
+    };
+    const s = cfg[type];
+    osc.type = s.shape;
+    osc.frequency.setValueAtTime(s.freq, ctx.currentTime);
+    if (type === 'win') {
+      osc.frequency.setValueAtTime(660, ctx.currentTime);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15);
+      osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.30);
+    }
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + s.dur);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + s.dur);
+  } catch(_) {}
+}
+</script>
+
+<!-- Portrait rotation prompt — shown via CSS on portrait phones -->
+<div id="portrait-overlay">
+  <div class="po-brand">Cipla</div>
+  <div class="po-icon">📱</div>
+  <div class="po-title">Rotate Your Device</div>
+  <div class="po-sub">This game is best played in<br><strong style="color:white">landscape mode</strong></div>
+</div>
+
+</body>
+</html>
