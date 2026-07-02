@@ -65,7 +65,7 @@
     if (displayName.length < 2) throw new Error("Enter at least 2 characters.");
     const players = await getAllPlayers();
     const normalizedName = normalizeName(displayName);
-    if (players.some(player => player.normalizedName === normalizedName)) throw new Error("That name already exists. Select it from the leaderboard or choose another name.");
+    if (players.some(player => normalizeName(player.normalizedName || player.name) === normalizedName)) throw new Error("That name already exists. Select it from the leaderboard or choose another name.");
     const now = new Date().toISOString();
     const player = {
       id: (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`),

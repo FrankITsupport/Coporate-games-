@@ -7,18 +7,19 @@
     pro: { cycle: 1200, zone: 16, perfectRatio: .28, successPoints: 460, perfectPoints: 900 }
   };
 
+  const project = (latitude, longitude) => ({ x: (longitude + 180) / 3.6, y: (90 - latitude) / 1.8 });
   const destinations = [
-    { city: "NAIROBI", country: "KENYA", currency: "KES", symbol: "KSh", amount: "3,200", x: 55, y: 58 },
-    { city: "CAIRO", country: "EGYPT", currency: "EGP", symbol: "E£", amount: "1,450", x: 54, y: 38 },
-    { city: "PARIS", country: "FRANCE", currency: "EUR", symbol: "€", amount: "38.00", x: 50, y: 27 },
-    { city: "LONDON", country: "UNITED KINGDOM", currency: "GBP", symbol: "£", amount: "29.00", x: 47, y: 23 },
-    { city: "NEW YORK", country: "USA", currency: "USD", symbol: "$", amount: "24.00", x: 25, y: 29 },
-    { city: "TORONTO", country: "CANADA", currency: "CAD", symbol: "C$", amount: "31.00", x: 23, y: 21 },
-    { city: "MEXICO CITY", country: "MEXICO", currency: "MXN", symbol: "MX$", amount: "520", x: 20, y: 42 },
-    { city: "SÃO PAULO", country: "BRAZIL", currency: "BRL", symbol: "R$", amount: "135", x: 34, y: 67 },
-    { city: "DUBAI", country: "UAE", currency: "AED", symbol: "AED", amount: "110", x: 64, y: 43 },
-    { city: "TOKYO", country: "JAPAN", currency: "JPY", symbol: "¥", amount: "4,200", x: 84, y: 39 }
-  ];
+    { city: "NAIROBI", country: "KENYA", currency: "KES", symbol: "KSh", amount: "3,200", lat: -1.2921, lon: 36.8219 },
+    { city: "CAIRO", country: "EGYPT", currency: "EGP", symbol: "E£", amount: "1,450", lat: 30.0444, lon: 31.2357 },
+    { city: "PARIS", country: "FRANCE", currency: "EUR", symbol: "€", amount: "38.00", lat: 48.8566, lon: 2.3522 },
+    { city: "LONDON", country: "UNITED KINGDOM", currency: "GBP", symbol: "£", amount: "29.00", lat: 51.5074, lon: -0.1278 },
+    { city: "NEW YORK", country: "USA", currency: "USD", symbol: "$", amount: "24.00", lat: 40.7128, lon: -74.006 },
+    { city: "TORONTO", country: "CANADA", currency: "CAD", symbol: "C$", amount: "31.00", lat: 43.6532, lon: -79.3832 },
+    { city: "MEXICO CITY", country: "MEXICO", currency: "MXN", symbol: "MX$", amount: "520", lat: 19.4326, lon: -99.1332 },
+    { city: "SÃO PAULO", country: "BRAZIL", currency: "BRL", symbol: "R$", amount: "135", lat: -23.5505, lon: -46.6333 },
+    { city: "DUBAI", country: "UAE", currency: "AED", symbol: "AED", amount: "110", lat: 25.2048, lon: 55.2708 },
+    { city: "TOKYO", country: "JAPAN", currency: "JPY", symbol: "¥", amount: "4,200", lat: 35.6762, lon: 139.6503 }
+  ].map(destination => Object.assign(destination, project(destination.lat, destination.lon)));
 
   class WorldTourGame {
     constructor(elements, callbacks) {
@@ -38,7 +39,7 @@
       this.state = {
         running: true, paused: false, locked: false, score: 0, streak: 1, bestStreak: 1,
         timeLeft: options.duration, startTime: performance.now(), markerStart: performance.now(),
-        totalPaused: 0, pausedAt: 0, destinationIndex: 0, completed: 0, itinerary: shuffled,
+        totalPaused: 0, pausedAt: 0, destinationIndex: 0, completed: 0, itinerary: shuffled.slice(0, 7),
         markerPosition: 0, zoneLeft: 40, zoneWidth: this.profile.zone
       };
       this.el.feedback.className = "world-feedback";
@@ -81,11 +82,23 @@
       this.el.terminalCurrency.textContent = destination.currency;
       this.el.amount.textContent = `${destination.symbol}${destination.amount}`;
       this.el.prompt.textContent = "Tap when the signal reaches green";
+      this.focusMap(destination);
       this.state.markerStart = performance.now();
       this.state.locked = false;
       this.el.payButton.disabled = false;
       this.renderPins();
+      this.renderRoute();
       this.renderPassport();
+    }
+
+    focusMap(destination) {
+      // Keep the active country in the clear left-middle area, away from the payment console.
+      const destinationFocus = 42;
+      const mapLeft = 3;
+      const mapWidth = 94;
+      const focusInsideMap = (destinationFocus - mapLeft) / mapWidth * 100;
+      const shift = focusInsideMap - destination.x;
+      this.el.map.style.setProperty("--map-pan", `${shift}%`);
     }
 
     makePayment() {
@@ -133,14 +146,34 @@
 
     renderPins() {
       this.el.pins.innerHTML = "";
-      this.state.itinerary.slice(0, 7).forEach((destination, index) => {
+      const lapPosition = this.state.destinationIndex % this.state.itinerary.length;
+      this.state.itinerary.forEach((destination, index) => {
         const pin = document.createElement("span");
-        pin.className = `map-pin ${index < this.state.destinationIndex ? "complete" : index === this.state.destinationIndex ? "current" : ""}`;
+        pin.className = `map-pin ${index < lapPosition ? "complete" : index === lapPosition ? "current" : ""}`;
         pin.style.left = `${destination.x}%`;
         pin.style.top = `${destination.y}%`;
         pin.title = destination.city;
+        pin.dataset.label = `${destination.city} · ${destination.country}`;
         this.el.pins.appendChild(pin);
       });
+    }
+
+    renderRoute() {
+      const lapPosition = this.state.destinationIndex % this.state.itinerary.length;
+      const stops = this.state.itinerary.slice(0, lapPosition + 1);
+      if (stops.length < 2) {
+        this.el.route.setAttribute("d", "");
+        return;
+      }
+      let path = `M ${stops[0].x.toFixed(2)} ${stops[0].y.toFixed(2)}`;
+      for (let index = 1; index < stops.length; index++) {
+        const from = stops[index - 1];
+        const to = stops[index];
+        const middleX = (from.x + to.x) / 2;
+        const middleY = Math.max(3, (from.y + to.y) / 2 - Math.min(9, Math.abs(to.x - from.x) * .14 + 3));
+        path += ` Q ${middleX.toFixed(2)} ${middleY.toFixed(2)} ${to.x.toFixed(2)} ${to.y.toFixed(2)}`;
+      }
+      this.el.route.setAttribute("d", path);
     }
 
     renderPassport() {

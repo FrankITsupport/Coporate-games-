@@ -46,9 +46,7 @@
           <div class="portal-ring ring-back"></div>
           <div class="portal-ring ring-front"></div>
           <div class="trophy">
-            <div class="trophy-cup">◆</div>
-            <div class="trophy-stem"></div>
-            <div class="trophy-base"></div>
+            <img src="assets/fifa-world-cup-trophy-transparent.png" alt="FIFA World Cup trophy">
           </div>
           <div class="football"><img src="assets/football-branded.png" alt=""></div>
           <div class="portal-shadow"></div>
@@ -64,10 +62,14 @@
             <p class="eyebrow">CHOOSE YOUR CHALLENGE</p>
             <h1 id="hubTitle">The pitch is yours.</h1>
           </div>
-          <button id="playerPill" class="player-pill" type="button" data-action="player-menu">
-            <span class="player-avatar">?</span>
-            <span><small>PLAYER</small><strong>Sign in</strong></span>
-          </button>
+          <div class="hub-actions">
+            <button class="hub-util-button" type="button" data-action="go-home">⌂ <span>Home</span></button>
+            <button class="hub-util-button" type="button" data-action="new-player">+ <span>New player</span></button>
+            <button id="playerPill" class="player-pill" type="button" data-action="player-menu">
+              <span class="player-avatar">?</span>
+              <span><small>PLAYER</small><strong>Sign in</strong></span>
+            </button>
+          </div>
         </div>
 
         <div class="game-grid">
@@ -127,6 +129,24 @@
         </div>
         <div id="goalArena" class="goal-arena">
           <div class="arena-lights"></div>
+          <div class="stadium-brand-ribbon" aria-hidden="true">
+            <div class="stadium-brand-track">
+              <span class="brand-board mpesa-board"><img src="assets/mpesa-logo.svg" alt=""></span>
+              <span class="brand-board visa-board"><img src="assets/visa-logo.svg" alt=""></span>
+              <span class="brand-board mpesa-board"><img src="assets/mpesa-logo.svg" alt=""></span>
+              <span class="brand-board visa-board"><img src="assets/visa-logo.svg" alt=""></span>
+              <span class="brand-board mpesa-board"><img src="assets/mpesa-logo.svg" alt=""></span>
+              <span class="brand-board visa-board"><img src="assets/visa-logo.svg" alt=""></span>
+              <span class="brand-board mpesa-board"><img src="assets/mpesa-logo.svg" alt=""></span>
+              <span class="brand-board visa-board"><img src="assets/visa-logo.svg" alt=""></span>
+              <span class="brand-board mpesa-board"><img src="assets/mpesa-logo.svg" alt=""></span>
+              <span class="brand-board visa-board"><img src="assets/visa-logo.svg" alt=""></span>
+              <span class="brand-board mpesa-board"><img src="assets/mpesa-logo.svg" alt=""></span>
+              <span class="brand-board visa-board"><img src="assets/visa-logo.svg" alt=""></span>
+              <span class="brand-board mpesa-board"><img src="assets/mpesa-logo.svg" alt=""></span>
+              <span class="brand-board visa-board"><img src="assets/visa-logo.svg" alt=""></span>
+            </div>
+          </div>
           <div class="goal-frame">
             <div class="goal-net"></div>
             <div id="targetLayer" class="target-layer"></div>
@@ -134,7 +154,22 @@
           </div>
           <div class="penalty-spot"></div>
           <div id="gameBall" class="game-ball"><img src="assets/football-branded.png" alt="Safaricom and Visa branded football" draggable="false"></div>
+          <div id="aimLine" class="aim-line" aria-hidden="true"></div>
+          <div id="aimGhost" class="aim-ghost" aria-hidden="true"></div>
+          <div id="powerMeter" class="power-meter" aria-hidden="true"><div id="powerMeterFill" class="power-meter-fill"></div><span class="power-meter-label">POWER</span></div>
           <div id="feedbackLayer" class="feedback-layer"></div>
+          <div id="goldenTutorial" class="golden-tutorial" role="dialog" aria-modal="true" aria-label="How to aim your shot">
+            <div class="golden-tutorial-card">
+              <p class="eyebrow">QUICK TIP</p>
+              <h3>Match your swipe to the distance</h3>
+              <div class="golden-tutorial-examples">
+                <div class="tutorial-example"><span class="tutorial-arrow short"></span><small>Short swipe</small><em>Close targets</em></div>
+                <div class="tutorial-example"><span class="tutorial-arrow long"></span><small>Long swipe</small><em>Far targets</em></div>
+              </div>
+              <p class="golden-tutorial-hint">Watch the dashed aim line and power bar while you drag, then release when the ghost ball sits on your target.</p>
+              <button id="goldenTutorialDismiss" class="primary-button" type="button">Got it, let's play <span>→</span></button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -149,9 +184,10 @@
         </div>
         <div id="worldArena" class="world-arena">
           <div class="world-map" aria-hidden="true">
-            <div class="continent north-america"></div><div class="continent south-america"></div>
-            <div class="continent europe"></div><div class="continent africa"></div><div class="continent asia"></div>
-            <div id="routeLine" class="route-line"></div>
+            <img class="world-map-art" src="assets/world-map.svg" alt="">
+            <svg class="route-map" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <path id="routePath" pathLength="1"></path>
+            </svg>
             <div id="mapPins" class="map-pins"></div>
           </div>
           <div class="world-progress-panel">
@@ -217,9 +253,9 @@
       <section id="showdownGameScreen" class="screen game-screen showdown-game-screen" aria-label="Goal Line Showdown multiplayer game">
         <div class="showdown-hud">
           <button class="hud-exit" type="button" data-action="leave-game">← EXIT</button>
-          <div class="showdown-player-hud player-one-hud"><small>PLAYER 1</small><strong id="showdownNameOne">PLAYER 1</strong><span id="showdownGoalsOne">0</span></div>
+          <div class="showdown-player-hud player-one-hud"><small>PLAYER 1</small><strong id="showdownNameOne">PLAYER 1</strong><em><b id="showdownPointsOne">0</b> PTS</em><span id="showdownGoalsOne">0</span></div>
           <div class="showdown-clock"><small>MATCH TIME</small><strong id="showdownTime">45</strong></div>
-          <div class="showdown-player-hud player-two-hud"><span id="showdownGoalsTwo">0</span><div><small>PLAYER 2</small><strong id="showdownNameTwo">PLAYER 2</strong></div></div>
+          <div class="showdown-player-hud player-two-hud"><span id="showdownGoalsTwo">0</span><div><small>PLAYER 2</small><strong id="showdownNameTwo">PLAYER 2</strong><em><b id="showdownPointsTwo">0</b> PTS</em></div></div>
           <button class="hud-pause" type="button" data-action="pause-game">Ⅱ</button>
         </div>
         <div id="showdownArena" class="showdown-arena">
@@ -266,13 +302,13 @@
 
     <section id="instructionsModal" class="modal wide-modal" role="dialog" aria-modal="true" aria-labelledby="instructionsTitle">
       <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
-      <p class="eyebrow">HOW TO PLAY</p>
-      <h2 id="instructionsTitle">Golden Goal</h2>
+      <p class="eyebrow">GOLDEN GOAL</p>
+      <h2 id="instructionsTitle">How to play</h2>
       <div class="instruction-grid">
-        <div class="instruction-step"><span class="step-icon">◎</span><strong>Find the target</strong><p>Watch for targets appearing inside the goal.</p></div>
-        <div class="instruction-step"><span class="step-icon">↗</span><strong>Swipe to shoot</strong><p>Swipe the ball toward your chosen target.</p></div>
-        <div class="instruction-step"><span class="step-icon">×3</span><strong>Build your combo</strong><p>Score consecutive goals for a bigger multiplier.</p></div>
-        <div class="instruction-step danger-step"><span class="step-icon">▰</span><strong>Avoid red cards</strong><p>They break your combo and deduct points.</p></div>
+        <div class="instruction-step"><span class="step-icon">◎</span><strong>Find the target</strong><p>Watch for targets in the goal.</p></div>
+        <div class="instruction-step"><span class="step-icon">↗</span><strong>Swipe to shoot</strong><p>Short swipe for close targets, long swipe for far ones. Watch the aim line as you drag.</p></div>
+        <div class="instruction-step"><span class="step-icon">×3</span><strong>Build your combo</strong><p>Score in a row for bigger multipliers.</p></div>
+        <div class="instruction-step danger-step"><span class="step-icon">▰</span><strong>Avoid red cards</strong><p>Breaks your combo, costs points.</p></div>
       </div>
       <div class="difficulty-picker" role="radiogroup" aria-label="Select difficulty">
         <button type="button" data-difficulty="easy"><strong>Easy</strong><small>Relaxed targets</small></button>
@@ -284,13 +320,13 @@
 
     <section id="worldInstructionsModal" class="modal wide-modal" role="dialog" aria-modal="true" aria-labelledby="worldInstructionsTitle">
       <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
-      <p class="eyebrow">HOW TO PLAY</p>
-      <h2 id="worldInstructionsTitle">GlobalPay World Tour</h2>
+      <p class="eyebrow">GLOBALPAY WORLD TOUR</p>
+      <h2 id="worldInstructionsTitle">How to play</h2>
       <div class="instruction-grid">
-        <div class="instruction-step"><span class="step-icon">◎</span><strong>Watch the signal</strong><p>The payment signal moves across the terminal.</p></div>
-        <div class="instruction-step"><span class="step-icon">◉</span><strong>Tap inside green</strong><p>Time your payment inside the approval window.</p></div>
-        <div class="instruction-step"><span class="step-icon">✈</span><strong>Unlock destinations</strong><p>Every successful tap moves your world tour forward.</p></div>
-        <div class="instruction-step"><span class="step-icon">×3</span><strong>Build a streak</strong><p>Perfect payments multiply your score.</p></div>
+        <div class="instruction-step"><span class="step-icon">◎</span><strong>Watch the signal</strong><p>It moves across the terminal.</p></div>
+        <div class="instruction-step"><span class="step-icon">◉</span><strong>Tap inside green</strong><p>Tap inside the approval window.</p></div>
+        <div class="instruction-step"><span class="step-icon">✈</span><strong>Unlock destinations</strong><p>Each hit moves your tour forward.</p></div>
+        <div class="instruction-step"><span class="step-icon">×3</span><strong>Build a streak</strong><p>Perfect taps multiply your score.</p></div>
       </div>
       <div class="difficulty-picker world-difficulty-picker" role="radiogroup" aria-label="Select difficulty">
         <button type="button" data-world-difficulty="easy"><strong>Easy</strong><small>Wide pay window</small></button>
@@ -302,13 +338,13 @@
 
     <section id="rushInstructionsModal" class="modal wide-modal" role="dialog" aria-modal="true" aria-labelledby="rushInstructionsTitle">
       <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
-      <p class="eyebrow">HOW TO PLAY</p>
-      <h2 id="rushInstructionsTitle">Trophy Rush</h2>
+      <p class="eyebrow">TROPHY RUSH</p>
+      <h2 id="rushInstructionsTitle">How to play</h2>
       <div class="instruction-grid">
-        <div class="instruction-step"><span class="step-icon">↔</span><strong>Change lanes</strong><p>Swipe or tap the arrows to move your football.</p></div>
-        <div class="instruction-step"><span class="step-icon">♛</span><strong>Collect glory</strong><p>Catch trophies and gold tokens to build your score.</p></div>
-        <div class="instruction-step"><span class="step-icon">◇</span><strong>Use power-ups</strong><p>Visa shields protect you and GlobalPay doubles points.</p></div>
-        <div class="instruction-step danger-step"><span class="step-icon">▰</span><strong>Dodge trouble</strong><p>Avoid red cards and defenders—they break your combo.</p></div>
+        <div class="instruction-step"><span class="step-icon">↔</span><strong>Change lanes</strong><p>Swipe or tap arrows to move.</p></div>
+        <div class="instruction-step"><span class="step-icon">♛</span><strong>Collect glory</strong><p>Catch trophies and gold for points.</p></div>
+        <div class="instruction-step"><span class="step-icon">◇</span><strong>Use power-ups</strong><p>Visa shields you, GlobalPay doubles points.</p></div>
+        <div class="instruction-step danger-step"><span class="step-icon">▰</span><strong>Dodge trouble</strong><p>Avoid red cards and defenders.</p></div>
       </div>
       <div class="difficulty-picker rush-difficulty-picker" role="radiogroup" aria-label="Select difficulty">
         <button type="button" data-rush-difficulty="easy"><strong>Easy</strong><small>Slower pitch</small></button>
@@ -336,13 +372,13 @@
 
     <section id="showdownInstructionsModal" class="modal wide-modal" role="dialog" aria-modal="true" aria-labelledby="showdownInstructionsTitle">
       <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
-      <p class="eyebrow">HOW TO PLAY TOGETHER</p>
-      <h2 id="showdownInstructionsTitle">Goal Line Showdown</h2>
+      <p class="eyebrow">GOAL LINE SHOWDOWN</p>
+      <h2 id="showdownInstructionsTitle">How to play together</h2>
       <div class="instruction-grid">
-        <div class="instruction-step"><span class="step-icon">1｜2</span><strong>Own your side</strong><p>Each player taps targets only on their half.</p></div>
-        <div class="instruction-step"><span class="step-icon">⚽</span><strong>Push the football</strong><p>Every correct hit drives the ball toward your opponent.</p></div>
-        <div class="instruction-step"><span class="step-icon">⚡</span><strong>Use power shots</strong><p>Gold targets create a stronger momentum swing.</p></div>
-        <div class="instruction-step danger-step"><span class="step-icon">▰</span><strong>Avoid red cards</strong><p>They reverse your momentum and break your combo.</p></div>
+        <div class="instruction-step"><span class="step-icon">1｜2</span><strong>Own your brand</strong><p>P1 taps M-PESA, P2 taps Visa.</p></div>
+        <div class="instruction-step"><span class="step-icon">⚽</span><strong>Push the football</strong><p>Correct hits push it toward your rival.</p></div>
+        <div class="instruction-step"><span class="step-icon">🏆</span><strong>Claim the trophy</strong><p>The trophy swings momentum hard.</p></div>
+        <div class="instruction-step danger-step"><span class="step-icon">▰</span><strong>Avoid red cards</strong><p>Reverses momentum, breaks your combo.</p></div>
       </div>
       <div class="difficulty-picker showdown-difficulty-picker" role="radiogroup" aria-label="Select difficulty">
         <button type="button" data-showdown-difficulty="friendly"><strong>Friendly</strong><small>Large targets</small></button>

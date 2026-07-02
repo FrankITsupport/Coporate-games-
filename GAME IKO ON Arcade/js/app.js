@@ -37,13 +37,15 @@
     "golden-goal": new window.GoldenGoalGame({
       arena: $("#goalArena"), layer: $("#targetLayer"), feedback: $("#feedbackLayer"),
       keeper: $("#keeper"), ball: $("#gameBall"), time: $("#hudTime"),
-      score: $("#hudScore"), combo: $("#hudCombo")
+      score: $("#hudScore"), combo: $("#hudCombo"),
+      aimLine: $("#aimLine"), aimGhost: $("#aimGhost"), powerMeter: $("#powerMeter"), powerFill: $("#powerMeterFill"),
+      tutorial: $("#goldenTutorial"), tutorialDismiss: $("#goldenTutorialDismiss")
     }, { complete: result => finishGameWithLeaderboard("golden-goal", result), feedback: showToast }),
     "world-tour": new window.WorldTourGame({
       arena: $("#worldArena"), marker: $("#scanMarker"), zone: $("#perfectZone"),
       payButton: $("#payNowButton"), prompt: $("#paymentPrompt"), feedback: $("#worldFeedback"),
       city: $("#destinationCity"), country: $("#destinationCountry"), currency: $("#destinationCurrency"),
-      terminalCurrency: $("#terminalCurrency"), amount: $("#terminalAmount"), pins: $("#mapPins"),
+      terminalCurrency: $("#terminalCurrency"), amount: $("#terminalAmount"), map: $(".world-map"), pins: $("#mapPins"), route: $("#routePath"),
       passport: $("#passportProgress"), time: $("#worldHudTime"), score: $("#worldHudScore"),
       combo: $("#worldHudCombo")
     }, { complete: result => finishGameWithLeaderboard("world-tour", result) }),
@@ -58,6 +60,7 @@
       layerOne: $("#showdownTargetsOne"), layerTwo: $("#showdownTargetsTwo"),
       nameOne: $("#showdownNameOne"), nameTwo: $("#showdownNameTwo"),
       goalsOne: $("#showdownGoalsOne"), goalsTwo: $("#showdownGoalsTwo"),
+      pointsOne: $("#showdownPointsOne"), pointsTwo: $("#showdownPointsTwo"),
       comboOne: $("#showdownComboOne"), comboTwo: $("#showdownComboTwo"),
       time: $("#showdownTime"), ball: $("#showdownBall"),
       greenBar: $(".momentum-green"), navyBar: $(".momentum-navy"),
@@ -134,7 +137,7 @@
     if (cleaned.length < 2) throw new Error("Each player name needs at least 2 characters.");
     const normalized = storage.normalizeName(cleaned);
     const players = await storage.getAllPlayers();
-    return players.find(player => player.normalizedName === normalized) || storage.createPlayer(cleaned);
+    return players.find(player => storage.normalizeName(player.normalizedName || player.name) === normalized) || storage.createPlayer(cleaned);
   }
 
   async function setupShowdown(event) {
@@ -185,7 +188,7 @@
       .map(player => {
         const data = player.games?.[gameId] || {};
         return {
-          player, score: gameId === "showdown" ? data.wins || 0 : data.bestScore || 0,
+          player, score: gameId === "showdown" ? data.lastScore ?? data.bestScore ?? 0 : data.bestScore || 0,
           attempts: gameId === "showdown" ? data.matches || 0 : data.attempts || 0,
           bestScore: data.bestScore || 0
         };
@@ -220,12 +223,12 @@
     const row = document.createElement("button");
     row.type = "button";
     row.className = `leaderboard-row ${currentPlayer?.id === item.player.id ? "current" : ""}`;
-    const scoreLabel = gameId === "showdown" ? `${item.score} ${item.score === 1 ? "WIN" : "WINS"}` : item.score.toLocaleString();
+    const scoreLabel = gameId === "showdown" ? `${item.score.toLocaleString()} PTS` : item.score.toLocaleString();
     row.innerHTML = `<span class="rank ${rank <= 3 ? "top" : ""}">${rank}</span><span class="lb-name"></span><span class="lb-score">${scoreLabel}</span>`;
     const name = row.querySelector(".lb-name");
     name.textContent = item.player.name;
     const detail = document.createElement("small");
-    detail.textContent = gameId === "showdown" ? `${item.attempts} ${item.attempts === 1 ? "match" : "matches"}` : `${item.attempts} ${item.attempts === 1 ? "attempt" : "attempts"}`;
+    detail.textContent = gameId === "showdown" ? `${item.bestScore || 0} best · ${item.attempts} ${item.attempts === 1 ? "match" : "matches"}` : `${item.attempts} ${item.attempts === 1 ? "attempt" : "attempts"}`;
     name.appendChild(detail);
     row.addEventListener("click", () => confirmReturningPlayer(item.player, gameId));
     list.appendChild(row);
@@ -236,7 +239,7 @@
     $("#confirmPlayerTitle").textContent = `Continue as ${player.name}?`;
     const gameData = player.games?.[gameId];
     $("#confirmPlayerStats").textContent = gameData
-      ? gameId === "showdown" ? `${gameData.wins || 0} wins from ${gameData.matches || 0} matches.` : `${gameConfig[gameId].name} personal best: ${gameData.bestScore.toLocaleString()}`
+      ? gameId === "showdown" ? `${(gameData.lastScore ?? gameData.bestScore ?? 0).toLocaleString()} points last match · ${gameData.wins || 0} wins from ${gameData.matches || 0} matches.` : `${gameConfig[gameId].name} personal best: ${gameData.bestScore.toLocaleString()}`
       : `No ${gameConfig[gameId].name} score yet.`;
     openModal("confirmPlayerModal");
   }
@@ -290,7 +293,7 @@
   async function finishShowdown(result) {
     activeGameId = "showdown";
     const matchResults = result.winner === null ? ["draw", "draw"] : result.winner === 0 ? ["win", "loss"] : ["loss", "win"];
-    const performanceScores = [0, 1].map(index => result.goals[index] * 1000 + result.hits[index] * 100);
+    const performanceScores = result.points;
     const recordedOne = await storage.recordScore(result.players[0].id, "showdown", performanceScores[0], {
       difficulty: result.difficulty, bestCombo: result.bestCombo[0], matchResult: matchResults[0]
     });
@@ -337,7 +340,7 @@
   async function finishShowdownWithLeaderboard(result) {
     activeGameId = "showdown";
     const matchResults = result.winner === null ? ["draw", "draw"] : result.winner === 0 ? ["win", "loss"] : ["loss", "win"];
-    const performanceScores = [0, 1].map(index => result.goals[index] * 1000 + result.hits[index] * 100);
+    const performanceScores = result.points;
     const recordedOne = await storage.recordScore(result.players[0].id, "showdown", performanceScores[0], {
       difficulty: result.difficulty, bestCombo: result.bestCombo[0], matchResult: matchResults[0]
     });
@@ -360,8 +363,8 @@
       const data = player.games?.[gameId] || {};
       return {
         player, data,
-        score: gameId === "showdown" ? data.wins || 0 : data.bestScore || 0,
-        secondary: data.bestScore || 0
+        score: gameId === "showdown" ? data.lastScore ?? data.bestScore ?? 0 : data.bestScore || 0,
+        secondary: gameId === "showdown" ? data.wins || 0 : data.bestScore || 0
       };
     }).sort((a, b) => b.score - a.score || b.secondary - a.secondary || a.player.name.localeCompare(b.player.name));
   }
@@ -375,14 +378,21 @@
     $("#postBoardGame").textContent = gameConfig[gameId].name.toLocaleUpperCase();
     const summaryContainer = $("#postGameSummary");
     summaryContainer.innerHTML = "";
-    summary.players.forEach((player, index) => {
+    const summaryCards = summary.players.map((player, index) => {
       const rank = ranked.findIndex(entry => entry.player.id === player.id) + 1;
       const data = player.games?.[gameId] || {};
       const detail = summary.mode === "showdown"
-        ? `${summary.result.goals[index]} goals · ${summary.result.hits[index]} hits · ${data.wins || 0} wins`
+        ? `${summary.result.points[index].toLocaleString()} PTS · ${summary.result.goals[index]} goals · ${summary.result.hits[index]} hits · ${data.wins || 0} wins`
         : `${summary.result.score.toLocaleString()} points · ${summary.detail}`;
-      summaryContainer.appendChild(createPostPlayerCard(player, rank, detail, summary.mode === "showdown" && summary.winner === index));
+      return createPostPlayerCard(player, rank, detail, summary.mode === "showdown" && summary.winner === index);
     });
+    summaryContainer.classList.toggle("showdown-summary", summary.mode === "showdown");
+    if (summary.mode === "showdown") {
+      const versus = document.createElement("div");
+      versus.className = "post-versus";
+      versus.innerHTML = `<strong>${summary.result.goals[0]}–${summary.result.goals[1]}</strong><span>VS</span>`;
+      summaryContainer.append(summaryCards[0], versus, summaryCards[1]);
+    } else summaryContainer.append(...summaryCards);
     const list = $("#postLeaderboardList");
     list.innerHTML = "";
     const topEntries = ranked.slice(0, 10);
@@ -426,7 +436,7 @@
   function appendPostLeaderboardRow(list, entry, rank, gameId, participantIds) {
     const row = document.createElement("div");
     row.className = `leaderboard-row ${participantIds.has(entry.player.id) ? "current" : ""}`;
-    const scoreLabel = gameId === "showdown" ? `${entry.score} ${entry.score === 1 ? "WIN" : "WINS"}` : entry.score.toLocaleString();
+    const scoreLabel = gameId === "showdown" ? `${entry.score.toLocaleString()} PTS` : entry.score.toLocaleString();
     row.innerHTML = `<span class="rank ${rank <= 3 ? "top" : ""}">${rank}</span><span class="lb-name"></span><span class="lb-score">${scoreLabel}</span>`;
     row.querySelector(".lb-name").textContent = entry.player.name;
     list.appendChild(row);
@@ -472,6 +482,17 @@
 
   $$('[data-action="enter-arcade"]').forEach(button => button.addEventListener("click", () => showScreen("hub")));
   $$('[data-action="home"]').forEach(button => button.addEventListener("click", () => { stopActiveGame(); showScreen("hub"); }));
+  $$('[data-action="go-home"]').forEach(button => button.addEventListener("click", () => {
+    stopActiveGame();
+    currentPlayer = null;
+    updatePlayerUI();
+    showScreen("attract");
+  }));
+  $$('[data-action="new-player"]').forEach(button => button.addEventListener("click", () => {
+    currentPlayer = null;
+    updatePlayerUI();
+    openFreshRegistration();
+  }));
   $$('[data-play="golden-goal"]').forEach(button => button.addEventListener("click", () => beginGame("golden-goal")));
   $$('[data-play="world-tour"]').forEach(button => button.addEventListener("click", () => beginGame("world-tour")));
   $$('[data-play="trophy-rush"]').forEach(button => button.addEventListener("click", () => beginGame("trophy-rush")));
@@ -505,7 +526,11 @@
     }
   });
   $$('[data-close-modal]').forEach(button => button.addEventListener("click", closeAllModals));
-  backdrop.addEventListener("click", () => { if (!$("#pauseModal").classList.contains("show") && !$("#resultModal").classList.contains("show")) closeAllModals(); });
+  backdrop.addEventListener("click", () => {
+    const lockedModalOpen = ["pauseModal", "resultModal", "showdownResultModal", "postGameModal"]
+      .some(id => document.getElementById(id)?.classList.contains("show"));
+    if (!lockedModalOpen) closeAllModals();
+  });
   $("#registrationForm").addEventListener("submit", registerPlayer);
   $("#showdownSetupForm").addEventListener("submit", setupShowdown);
   $("#leaderboardSearch").addEventListener("input", event => renderLeaderboard(event.target.value, activeLeaderboardGame));

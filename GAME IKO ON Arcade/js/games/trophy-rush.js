@@ -9,7 +9,8 @@
 
   const itemTypes = {
     trophy: { label: "🏆", kind: "collect" },
-    "visa-shield": { label: "VISA", kind: "power" },
+    "visa-shield": { label: "VISA", kind: "power", image: "assets/visa-logo.svg" },
+    "mpesa-glory": { label: "M-PESA", kind: "collect", image: "assets/mpesa-logo.svg" },
     "global-boost": { label: "×2", kind: "power" },
     "golden-ball": { label: "GOLD", kind: "collect" },
     "red-card": { label: "RED", kind: "obstacle" },
@@ -82,14 +83,20 @@
       const roll = Math.random();
       let type;
       if (roll < this.profile.obstacleChance) type = Math.random() < .55 ? "red-card" : "defender";
-      else if (roll < this.profile.obstacleChance + .11) type = "visa-shield";
-      else if (roll < this.profile.obstacleChance + .21) type = "global-boost";
-      else if (roll < this.profile.obstacleChance + .28) type = "golden-ball";
+      else if (roll < this.profile.obstacleChance + .10) type = "visa-shield";
+      else if (roll < this.profile.obstacleChance + .19) type = "mpesa-glory";
+      else if (roll < this.profile.obstacleChance + .28) type = "global-boost";
+      else if (roll < this.profile.obstacleChance + .35) type = "golden-ball";
       else type = "trophy";
       const lane = Math.floor(Math.random() * 3);
       const element = document.createElement("div");
       element.className = `rush-item ${type}`;
-      element.textContent = itemTypes[type].label;
+      if (itemTypes[type].image) {
+        const image = document.createElement("img");
+        image.src = itemTypes[type].image;
+        image.alt = "";
+        element.appendChild(image);
+      } else element.textContent = itemTypes[type].label;
       element.setAttribute("aria-hidden", "true");
       this.el.layer.appendChild(element);
       this.state.items.push({ element, type, lane, progress: 0, resolved: false });
@@ -144,14 +151,15 @@
         this.state.score += 150;
         this.showFeedback("GLOBALPAY ×2", "power");
       } else {
-        const base = item.type === "golden-ball" ? 650 : this.profile.basePoints;
+        const base = item.type === "golden-ball" ? 650 : item.type === "mpesa-glory" ? 500 : this.profile.basePoints;
         const boost = this.state.boostUntil > now ? 2 : 1;
         const points = Math.round(base * this.state.combo * boost);
         this.state.score += points;
-        this.state.combo = Math.min(5, this.state.combo + .25);
+        this.state.combo = Math.min(5, this.state.combo + (item.type === "mpesa-glory" ? .5 : .25));
         this.state.bestCombo = Math.max(this.state.bestCombo, this.state.combo);
         this.state.collected++;
-        this.showFeedback(`+${points} ${item.type === "golden-ball" ? "GOLDEN BALL" : "TROPHY"}`, "good");
+        const label = item.type === "golden-ball" ? "GOLDEN BALL" : item.type === "mpesa-glory" ? "M-PESA GLORY" : "TROPHY";
+        this.showFeedback(`+${points} ${label}`, "good");
       }
       this.updatePowerUI();
       this.updateHud();
@@ -183,9 +191,17 @@
 
     setLane(lane) {
       if (!this.state) return;
+      const previousLane = this.state.lane;
       this.state.lane = lane;
       this.el.ball.classList.remove("lane-0", "lane-1", "lane-2");
       this.el.ball.classList.add(`lane-${lane}`);
+      if (lane !== previousLane) {
+        this.el.ball.classList.remove("moving-left", "moving-right");
+        void this.el.ball.offsetWidth;
+        this.el.ball.classList.add(lane < previousLane ? "moving-left" : "moving-right");
+        clearTimeout(this.laneTimer);
+        this.laneTimer = window.setTimeout(() => this.el.ball.classList.remove("moving-left", "moving-right"), 240);
+      }
     }
 
     updatePowerUI() {
@@ -249,6 +265,7 @@
     stop() {
       if (this.state) this.state.running = false;
       if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
+      clearTimeout(this.laneTimer);
       if (this.el?.layer) this.el.layer.innerHTML = "";
     }
   }

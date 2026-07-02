@@ -24,7 +24,7 @@
       this.state = {
         running: true, paused: false, locked: false, startTime: now,
         totalPaused: 0, pausedAt: 0, timeLeft: options.duration, position: 0,
-        goals: [0, 0], hits: [0, 0], combo: [1, 1], bestCombo: [1, 1],
+        goals: [0, 0], hits: [0, 0], points: [0, 0], combo: [1, 1], bestCombo: [1, 1],
         targets: [[], []], nextSpawn: [now, now + this.profile.spawnGap / 2]
       };
       this.el.nameOne.textContent = options.players[0].name;
@@ -61,8 +61,14 @@
       const type = roll < this.profile.dangerChance ? "danger" : roll < this.profile.dangerChance + this.profile.powerChance ? "power" : "normal";
       const target = document.createElement("button");
       target.type = "button";
-      target.className = `showdown-target ${type === "normal" ? "" : type}`;
-      target.textContent = type === "danger" ? "RED" : type === "power" ? "POWER" : "+";
+      target.className = `showdown-target ${type === "normal" ? `brand-target ${side === 0 ? "mpesa-target" : "visa-target"}` : type}`;
+      if (type === "danger") target.textContent = "RED";
+      else {
+        const image = document.createElement("img");
+        image.src = type === "power" ? "assets/fifa-world-cup-trophy-transparent.png" : side === 0 ? "assets/mpesa-logo.svg" : "assets/visa-logo.svg";
+        image.alt = "";
+        target.appendChild(image);
+      }
       let x = 50;
       let y = 50;
       for (let attempt = 0; attempt < 12; attempt++) {
@@ -88,16 +94,19 @@
       const direction = side === 0 ? 1 : -1;
       if (item.type === "danger") {
         this.state.position -= direction * this.profile.push * 1.15;
+        this.state.points[side] = Math.max(0, this.state.points[side] - 100);
         this.state.combo[side] = 1;
         this.showFeedback(`${this.options.players[side].name} RED CARD`, side === 0 ? "left" : "right");
       } else {
         const comboBoost = 1 + (this.state.combo[side] - 1) * .07;
         const power = item.type === "power" ? 2.05 : 1;
+        const points = Math.round((item.type === "power" ? 350 : 100) * this.state.combo[side]);
         this.state.position += direction * this.profile.push * power * comboBoost;
         this.state.hits[side]++;
+        this.state.points[side] += points;
         this.state.combo[side] = Math.min(5, this.state.combo[side] + (item.type === "power" ? .5 : .25));
         this.state.bestCombo[side] = Math.max(this.state.bestCombo[side], this.state.combo[side]);
-        if (item.type === "power") this.showFeedback(`${side === 0 ? "GREEN" : "NAVY"} POWER SHOT`, side === 0 ? "left" : "right");
+        if (item.type === "power") this.showFeedback(`${this.options.players[side].name} TROPHY +${points}`, side === 0 ? "left" : "right");
       }
       this.state.position = Math.max(-100, Math.min(100, this.state.position));
       if (Math.abs(this.state.position) >= 96) this.scoreGoal(this.state.position > 0 ? 0 : 1);
@@ -120,6 +129,7 @@
 
     scoreGoal(side) {
       this.state.goals[side]++;
+      this.state.points[side] += 1000;
       this.state.locked = true;
       this.clearTargets();
       this.el.ball.classList.remove("goal-flash");
@@ -149,6 +159,8 @@
       this.el.time.textContent = this.state.timeLeft;
       this.el.goalsOne.textContent = this.state.goals[0];
       this.el.goalsTwo.textContent = this.state.goals[1];
+      this.el.pointsOne.textContent = this.state.points[0].toLocaleString();
+      this.el.pointsTwo.textContent = this.state.points[1].toLocaleString();
       this.el.comboOne.textContent = `×${this.formatMultiplier(this.state.combo[0])}`;
       this.el.comboTwo.textContent = `×${this.formatMultiplier(this.state.combo[1])}`;
       this.el.ball.style.left = `${50 + this.state.position * .43}%`;
@@ -191,7 +203,7 @@
       if (this.state.goals[0] !== this.state.goals[1]) winner = this.state.goals[0] > this.state.goals[1] ? 0 : 1;
       else if (Math.abs(this.state.position) >= 8) winner = this.state.position > 0 ? 0 : 1;
       this.callbacks.complete({
-        winner, goals: [...this.state.goals], hits: [...this.state.hits],
+        winner, goals: [...this.state.goals], hits: [...this.state.hits], points: [...this.state.points],
         bestCombo: [...this.state.bestCombo], position: this.state.position,
         difficulty: this.options.difficulty, players: this.options.players
       });
