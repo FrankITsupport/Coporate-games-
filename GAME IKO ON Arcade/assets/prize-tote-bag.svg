@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <defs>
+    <linearGradient id="tCanvas" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#cfc19b"/>
+      <stop offset=".16" stop-color="#e9dfc2"/>
+      <stop offset=".45" stop-color="#f5eed8"/>
+      <stop offset=".78" stop-color="#e0d4b2"/>
+      <stop offset="1" stop-color="#c4b48c"/>
+    </linearGradient>
+    <linearGradient id="tHem" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d8cba6"/>
+      <stop offset="1" stop-color="#efe6cc"/>
+    </linearGradient>
+    <linearGradient id="tStrap" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#164a1e"/>
+      <stop offset=".5" stop-color="#22732f"/>
+      <stop offset="1" stop-color="#14461d"/>
+    </linearGradient>
+    <filter id="tBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+  </defs>
+  <ellipse cx="120" cy="222" rx="74" ry="9" fill="#000" opacity=".32" filter="url(#tBlur)"/>
+  <path d="M76 96 C76 34 164 34 164 96" fill="none" stroke="url(#tStrap)" stroke-width="14" stroke-linecap="round"/>
+  <path d="M76 96 C76 34 164 34 164 96" fill="none" stroke="#36b84b" stroke-width="4" stroke-linecap="round" opacity=".55" transform="translate(-2,-2)"/>
+  <path d="M50 90 h140 a5 5 0 0 1 5 5.6 l-13 112 q-1.6 13.4 -15 13.4 H73 q-13.4 0 -15 -13.4 l-13 -112 A5 5 0 0 1 50 90 z" fill="url(#tCanvas)"/>
+  <path d="M50 90 h140 a5 5 0 0 1 5 5.6 l-2.2 19.4 H47.2 L45 95.6 A5 5 0 0 1 50 90 z" fill="url(#tHem)"/>
+  <path d="M49 108 h142" stroke="#a4926a" stroke-width="1.6" stroke-dasharray="4 3" opacity=".8"/>
+  <path d="M52.5 94 h135" stroke="#fffbe9" stroke-width="1.4" stroke-dasharray="4 3" opacity=".7"/>
+  <path d="M50 90 h20 l10 131 H73 q-13.4 0 -15 -13.4 l-13 -112 A5 5 0 0 1 50 90 z" fill="#8b7a54" opacity=".22"/>
+  <path d="M190 90 h-16 l-10 131 h13 q13.4 0 15 -13.4 l13 -112 A5 5 0 0 0 190 90 z" fill="#8b7a54" opacity=".3"/>
+  <path d="M88 118 q4 46 2 88" stroke="#9c8a62" stroke-width="3" fill="none" opacity=".25"/>
+  <path d="M150 120 q-2 44 1 84" stroke="#fffbe9" stroke-width="3" fill="none" opacity=".5"/>
+  <path d="M64 208 q56 10 112 0 l-1 6 q-2 7 -14 7 H73 q-12 0 -14 -7 z" fill="#8b7a54" opacity=".28"/>
+  <g text-anchor="middle" font-family="Arial, sans-serif" font-weight="900">
+  </g>
+  <circle cx="120" cy="196" r="9" fill="none" stroke="#163c96" stroke-width="3"/>
+  <path d="M120 187 v18 M111 196 h18 M114 189.5 l12 13 M126 189.5 l-12 13" stroke="#163c96" stroke-width="1.4"/>
+</svg>

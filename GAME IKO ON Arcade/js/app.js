@@ -8,18 +8,20 @@
   const screens = {
     attract: $("#attractScreen"), hub: $("#hubScreen"),
     goldenGame: $("#gameScreen"), worldGame: $("#worldGameScreen"), rushGame: $("#rushGameScreen"),
-    showdownGame: $("#showdownGameScreen")
+    showdownGame: $("#showdownGameScreen"), wheelGame: $("#wheelGameScreen")
   };
   const gameConfig = {
     "golden-goal": { name: "Golden Goal", screen: "goldenGame", instructions: "instructionsModal" },
     "world-tour": { name: "GlobalPay World Tour", screen: "worldGame", instructions: "worldInstructionsModal" },
     "trophy-rush": { name: "Trophy Rush", screen: "rushGame", instructions: "rushInstructionsModal" },
-    showdown: { name: "Goal Line Showdown", screen: "showdownGame", instructions: "showdownInstructionsModal" }
+    showdown: { name: "Goal Line Showdown", screen: "showdownGame", instructions: "showdownInstructionsModal" },
+    "spin-wheel": { name: "Spin & Win", screen: "wheelGame", instructions: "wheelInstructionsModal" }
   };
   const modals = $$(".modal");
   const backdrop = $("#modalBackdrop");
   let currentPlayer = null;
   let pendingPlayer = null;
+  let pendingGameId = null;
   let currentScreen = "attract";
   let activeGameId = "golden-goal";
   let activeLeaderboardGame = "golden-goal";
@@ -65,7 +67,11 @@
       time: $("#showdownTime"), ball: $("#showdownBall"),
       greenBar: $(".momentum-green"), navyBar: $(".momentum-navy"),
       feedback: $("#showdownFeedback")
-    }, { complete: finishShowdownWithLeaderboard })
+    }, { complete: finishShowdownWithLeaderboard }),
+    "spin-wheel": new window.SpinWheelGame({
+      wheel: $("#prizeWheel"), pointer: $("#wheelPointer"),
+      spinButton: $("#spinWheelButton"), status: $("#wheelStatus")
+    }, { complete: finishWheel })
   };
 
   function showScreen(name) {
@@ -99,6 +105,7 @@
     $("#hudPlayer").textContent = currentPlayer?.name || "PLAYER";
     $("#worldHudPlayer").textContent = currentPlayer?.name || "PLAYER";
     $("#rushHudPlayer").textContent = currentPlayer?.name || "PLAYER";
+    $("#wheelHudPlayer").textContent = currentPlayer?.name || "PLAYER";
   }
 
   function beginGame(gameId) {
@@ -172,6 +179,7 @@
       updatePlayerUI();
       showToast(`Welcome, ${currentPlayer.name}`);
       const intent = $("#registrationModal").dataset.intent;
+      $("#registrationModal").dataset.intent = "";
       if (gameConfig[intent]) {
         activeGameId = intent;
         openModal(gameConfig[intent].instructions);
@@ -236,11 +244,16 @@
 
   function confirmReturningPlayer(player, gameId) {
     pendingPlayer = player;
+    // If the player arrived here from a game's registration prompt, that game
+    // wins over whichever tab the leaderboard happens to be showing.
+    const intent = $("#registrationModal").dataset.intent;
+    const targetGame = gameConfig[intent] ? intent : gameId;
+    pendingGameId = targetGame;
     $("#confirmPlayerTitle").textContent = `Continue as ${player.name}?`;
-    const gameData = player.games?.[gameId];
+    const gameData = player.games?.[targetGame];
     $("#confirmPlayerStats").textContent = gameData
-      ? gameId === "showdown" ? `${(gameData.lastScore ?? gameData.bestScore ?? 0).toLocaleString()} points last match · ${gameData.wins || 0} wins from ${gameData.matches || 0} matches.` : `${gameConfig[gameId].name} personal best: ${gameData.bestScore.toLocaleString()}`
-      : `No ${gameConfig[gameId].name} score yet.`;
+      ? targetGame === "showdown" ? `${(gameData.lastScore ?? gameData.bestScore ?? 0).toLocaleString()} points last match · ${gameData.wins || 0} wins from ${gameData.matches || 0} matches.` : `${gameConfig[targetGame].name} personal best: ${gameData.bestScore.toLocaleString()}`
+      : `No ${gameConfig[targetGame].name} score yet.`;
     openModal("confirmPlayerModal");
   }
 
@@ -317,6 +330,40 @@
       $("#showdownWinner").textContent = `${result.players[result.winner].name} WINS`;
     }
     openModal("showdownResultModal");
+  }
+
+  function startSpinWheel() {
+    activeGameId = "spin-wheel";
+    showScreen("wheelGame");
+    games["spin-wheel"].start({});
+  }
+
+  async function finishWheel(result) {
+    activeGameId = "spin-wheel";
+    const recorded = await storage.recordScore(currentPlayer.id, "spin-wheel", result.value, { difficulty: "standard", bestCombo: 1 });
+    currentPlayer = recorded.player;
+    updatePlayerUI();
+    const image = $("#wheelPrizeImage");
+    const glyph = $("#wheelPrizeGlyph");
+    if (result.won) {
+      $("#wheelResultLabel").textContent = "PRIZE UNLOCKED";
+      $("#wheelResultTitle").textContent = `You won a ${result.label}!`;
+      $("#wheelResultCopy").textContent = "Show this screen at the prize desk to collect your merch.";
+      image.src = result.icon;
+      image.alt = result.label;
+      image.style.display = "";
+      glyph.style.display = "none";
+      $("#wheelPrizeArt").classList.add("winner");
+    } else {
+      $("#wheelResultLabel").textContent = result.id === "almost" ? "SO CLOSE" : "NOT THIS TIME";
+      $("#wheelResultTitle").textContent = result.id === "almost" ? "Almost! Inches away." : "Try again!";
+      $("#wheelResultCopy").textContent = "The wheel says not yet — give it another spin and chase that merch.";
+      image.style.display = "none";
+      glyph.textContent = result.id === "almost" ? "◎" : "↻";
+      glyph.style.display = "";
+      $("#wheelPrizeArt").classList.remove("winner");
+    }
+    openModal("wheelResultModal");
   }
 
   async function finishGameWithLeaderboard(gameId, result) {
@@ -497,8 +544,13 @@
   $$('[data-play="world-tour"]').forEach(button => button.addEventListener("click", () => beginGame("world-tour")));
   $$('[data-play="trophy-rush"]').forEach(button => button.addEventListener("click", () => beginGame("trophy-rush")));
   $$('[data-play="showdown"]').forEach(button => button.addEventListener("click", beginShowdown));
+  $$('[data-play="spin-wheel"]').forEach(button => button.addEventListener("click", () => beginGame("spin-wheel")));
   $$('[data-action="player-menu"]').forEach(button => button.addEventListener("click", () => currentPlayer ? showToast(`Playing as ${currentPlayer.name}`) : openModal("registrationModal")));
-  $$('[data-action="leaderboard"]').forEach(button => button.addEventListener("click", async () => { await renderLeaderboard("", activeLeaderboardGame); openModal("leaderboardModal"); }));
+  $$('[data-action="leaderboard"]').forEach(button => button.addEventListener("click", async () => {
+    $("#registrationModal").dataset.intent = "";
+    await renderLeaderboard("", activeLeaderboardGame);
+    openModal("leaderboardModal");
+  }));
   $$('[data-action="settings"]').forEach(button => button.addEventListener("click", () => { applySettingsToForm(); openModal("settingsModal"); }));
   $$('[data-action="open-returning"]').forEach(button => button.addEventListener("click", async () => { await renderLeaderboard("", activeLeaderboardGame); openModal("leaderboardModal"); }));
   $$('[data-action="leave-game"]').forEach(button => button.addEventListener("click", leaveGame));
@@ -527,7 +579,7 @@
   });
   $$('[data-close-modal]').forEach(button => button.addEventListener("click", closeAllModals));
   backdrop.addEventListener("click", () => {
-    const lockedModalOpen = ["pauseModal", "resultModal", "showdownResultModal", "postGameModal"]
+    const lockedModalOpen = ["pauseModal", "resultModal", "showdownResultModal", "postGameModal", "wheelResultModal"]
       .some(id => document.getElementById(id)?.classList.contains("show"));
     if (!lockedModalOpen) closeAllModals();
   });
@@ -541,10 +593,18 @@
   $("#confirmPlayerButton").addEventListener("click", () => {
     if (!pendingPlayer) return;
     currentPlayer = pendingPlayer;
+    const gameId = pendingGameId;
     pendingPlayer = null;
+    pendingGameId = null;
+    $("#registrationModal").dataset.intent = "";
     updatePlayerUI();
-    showScreen("hub");
     showToast(`Welcome back, ${currentPlayer.name}`);
+    if (gameId && gameConfig[gameId]) {
+      activeGameId = gameId;
+      openModal(gameConfig[gameId].instructions);
+    } else {
+      showScreen("hub");
+    }
   });
   $$('[data-difficulty]').forEach(button => button.addEventListener("click", () => {
     selectedDifficulty = button.dataset.difficulty;
@@ -566,6 +626,8 @@
   $("#startWorldTour").addEventListener("click", () => startCountdown("world-tour"));
   $("#startTrophyRush").addEventListener("click", () => startCountdown("trophy-rush"));
   $("#startShowdown").addEventListener("click", () => startCountdown("showdown"));
+  $("#startSpinWheel").addEventListener("click", startSpinWheel);
+  $$('[data-action="wheel-spin-again"]').forEach(button => button.addEventListener("click", startSpinWheel));
   $$('[data-action="showdown-rematch"]').forEach(button => button.addEventListener("click", () => openModal("showdownInstructionsModal")));
   $("#saveSettings").addEventListener("click", () => {
     settings = storage.saveSettings({ sound: $("#soundSetting").checked, duration: Number($("#durationSetting").value), idleSeconds: Number($("#idleSetting").value) });

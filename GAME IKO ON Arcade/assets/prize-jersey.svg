@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <defs>
+    <linearGradient id="jBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2ea041"/>
+      <stop offset=".55" stop-color="#247c33"/>
+      <stop offset="1" stop-color="#1a5824"/>
+    </linearGradient>
+    <linearGradient id="jSleeve" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#20509f"/>
+      <stop offset="1" stop-color="#0d2a6e"/>
+    </linearGradient>
+    <radialGradient id="jSheen" cx=".38" cy=".18" r=".9">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".28"/>
+      <stop offset=".45" stop-color="#ffffff" stop-opacity=".05"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="jBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+  </defs>
+  <ellipse cx="120" cy="223" rx="72" ry="8" fill="#000" opacity=".3" filter="url(#jBlur)"/>
+  <path d="M86 34 L36 56 L16 96 L52 114 L56 202 a10 10 0 0 0 10 9 h108 a10 10 0 0 0 10 -9 L188 114 L224 96 L204 56 L154 34 c-4 16 -64 16 -68 0 z" fill="url(#jBody)"/>
+  <path d="M36 56 L16 96 L52 114 L64 66 z" fill="url(#jSleeve)"/>
+  <path d="M204 56 L224 96 L188 114 L176 66 z" fill="url(#jSleeve)"/>
+  <path d="M36 56 L16 96 l6 3 L58 61 z" fill="#3f74d1" opacity=".5"/>
+  <path d="M204 56 L224 96 l-6 3 L182 61 z" fill="#3f74d1" opacity=".5"/>
+  <path d="M86 34 c-2 18 70 18 68 0 l-11 -5 c-3 11 -43 11 -46 0 z" fill="#0d2a6e"/>
+  <path d="M97 30 c4 9 42 9 46 0 l-4.5 -2 c-4 7 -33 7 -37 0 z" fill="#f4c84b"/>
+  <path d="M86 34 L36 56 L16 96 L52 114 L56 202 a10 10 0 0 0 10 9 h54 V41 c-14 -1 -23 -3 -24 -7 z" fill="url(#jSheen)"/>
+  <path d="M52 114 l14 -8 -8 96 a10 10 0 0 1 -2 -6 z" fill="#03400d" opacity=".5"/>
+  <path d="M188 114 l-14 -8 8 96 a10 10 0 0 0 2 -6 z" fill="#03400d" opacity=".5"/>
+  <path d="M60 150 q30 12 60 2 M64 178 q26 10 52 3" stroke="#03400d" stroke-width="2.5" fill="none" opacity=".28"/>
+  <g text-anchor="middle" font-family="Arial, sans-serif" font-weight="900">
+    <text x="121.5" y="141.5" font-size="64" fill="#052a0b" opacity=".55">10</text>
+    <text x="120" y="140" font-size="64" fill="#f4c84b">10</text>
+  </g>
+  <path d="M66 205 h108" stroke="#03400d" stroke-width="2" stroke-dasharray="5 4" opacity=".5"/>
+</svg>

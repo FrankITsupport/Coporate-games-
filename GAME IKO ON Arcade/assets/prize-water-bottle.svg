@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <defs>
+    <linearGradient id="bSteel" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0a1e52"/>
+      <stop offset=".14" stop-color="#1e3f8f"/>
+      <stop offset=".33" stop-color="#4a6fc4"/>
+      <stop offset=".46" stop-color="#7d9be0"/>
+      <stop offset=".58" stop-color="#33549f"/>
+      <stop offset=".85" stop-color="#122a68"/>
+      <stop offset="1" stop-color="#081840"/>
+    </linearGradient>
+    <linearGradient id="bCap" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0d0f14"/>
+      <stop offset=".4" stop-color="#3b414d"/>
+      <stop offset=".55" stop-color="#596272"/>
+      <stop offset=".75" stop-color="#23272f"/>
+      <stop offset="1" stop-color="#0a0c10"/>
+    </linearGradient>
+    <linearGradient id="bLabel" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1a5824"/>
+      <stop offset=".35" stop-color="#258034"/>
+      <stop offset=".55" stop-color="#35b74b"/>
+      <stop offset=".8" stop-color="#21702e"/>
+      <stop offset="1" stop-color="#154a1e"/>
+    </linearGradient>
+    <filter id="bBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+  </defs>
+  <ellipse cx="120" cy="224" rx="52" ry="8" fill="#000" opacity=".35" filter="url(#bBlur)"/>
+  <path d="M104 20 h32 a5 5 0 0 1 5 5 v6 h-42 v-6 a5 5 0 0 1 5 -5 z" fill="url(#bCap)"/>
+  <rect x="96" y="31" width="48" height="14" rx="5" fill="url(#bCap)"/>
+  <path d="M136 26 q18 2 18 16 t-18 16" fill="none" stroke="#2b303a" stroke-width="7" stroke-linecap="round"/>
+  <path d="M94 45 c0 14 -14 20 -14 42 v118 a18 18 0 0 0 18 18 h44 a18 18 0 0 0 18 -18 V87 c0 -22 -14 -28 -14 -42 z" fill="url(#bSteel)"/>
+  <path d="M94 45 c0 14 -14 20 -14 42 v10 c26 -8 54 -8 80 0 v-10 c0 -22 -14 -28 -14 -42 z" fill="#ffffff" opacity=".07"/>
+  <rect x="80" y="108" width="128" height="58" fill="none"/>
+  <path d="M80 106 c26 -9 54 -9 80 0 v56 c-26 9 -54 9 -80 0 z" fill="url(#bLabel)"/>
+  <g text-anchor="middle" font-family="Arial, sans-serif" font-weight="900">
+  </g>
+  <path d="M96 52 c-3 10 -10 15 -11 32 v112 a14 14 0 0 0 5 11" fill="none" stroke="#bcd0f7" stroke-width="6" stroke-linecap="round" opacity=".5"/>
+  <path d="M143 55 c3 9 8 14 9 28" fill="none" stroke="#05123a" stroke-width="7" stroke-linecap="round" opacity=".55"/>
+</svg>
