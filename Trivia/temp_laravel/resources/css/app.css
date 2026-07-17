@@ -1,0 +1,65 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+/*
+ * Brand palette shared with the "Game Iko On Arcade" sibling project:
+ * Safaricom M-PESA green + white, with a Visa-blue accent for payment/prediction UI.
+ */
+@theme {
+    --color-brand-ink: #f8fff9;
+    --color-brand-muted: #a9c4ae;
+    --color-brand-night: #0c2810;
+    --color-brand-deep: #103717;
+    --color-brand-green: #3bb44a;
+    --color-brand-lime: #52c75f;
+    --color-brand-visa: #163c96;
+    --color-brand-gold: #f4c84b;
+    --color-brand-red: #ff4f46;
+
+    --font-sans: 'Figtree', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+    body {
+        background-color: #f4f8f5;
+    }
+}
+
+@layer components {
+    /* Dark green stadium backdrop, reused wherever the hero artwork appears. */
+    .brand-stadium-bg {
+        position: relative;
+        background-color: var(--color-brand-night);
+        background-image:
+            radial-gradient(circle at 62% 14%, rgba(82, 199, 95, .35) 0, transparent 42%),
+            radial-gradient(circle at 18% 42%, rgba(59, 180, 74, .28) 0, transparent 55%),
+            radial-gradient(circle at 85% 80%, rgba(59, 180, 74, .18) 0, transparent 55%),
+            linear-gradient(150deg, #1e8931 0%, #135c20 45%, #0a3511 100%);
+    }
+
+    .brand-crowd-dots {
+        position: absolute;
+        inset: 0;
+        opacity: .16;
+        background-image: radial-gradient(circle, #a0e3ab 1.4px, transparent 1.7px);
+        background-size: 14px 14px;
+        mask-image: linear-gradient(transparent, #000 40%, #000 70%, transparent);
+        pointer-events: none;
+    }
+
+    .brand-topbar-glow {
+        position: relative;
+    }
+    .brand-topbar-glow::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--color-brand-green) 18%, var(--color-brand-lime) 50%, var(--color-brand-green) 82%, transparent);
+        box-shadow: 0 1px 12px rgba(82, 199, 95, .35);
+    }
+}

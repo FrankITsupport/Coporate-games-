@@ -206,7 +206,7 @@
     $("#leaderboardGameLabel").textContent = gameConfig[gameId].name.toLocaleUpperCase();
     $$('[data-leaderboard-game]').forEach(button => button.classList.toggle("selected", button.dataset.leaderboardGame === gameId));
     const normalizedQuery = query.trim().toLocaleUpperCase();
-    const visible = normalizedQuery ? ranked.filter(item => item.player.name.includes(normalizedQuery)) : ranked.slice(0, 50);
+    const visible = normalizedQuery ? ranked.filter(item => item.player.name.includes(normalizedQuery)) : ranked;
     const list = $("#leaderboardList");
     if (!visible.length) {
       list.innerHTML = `<div class="empty-board">${players.length ? "No matching player found." : "No scores yet. Be the first on the board."}</div>`;
@@ -332,19 +332,69 @@
     openModal("showdownResultModal");
   }
 
+  let wheelSpinCount = 0;
+  let wheelCustomerCategory = null;
+
+  function resetWheelCategoryPicker() {
+    wheelCustomerCategory = null;
+    $$("[data-wheel-customer]").forEach(button => button.classList.remove("selected"));
+  }
+
   function startSpinWheel() {
+    if (!wheelCustomerCategory) {
+      showToast("Choose new or existing customer");
+      return;
+    }
     activeGameId = "spin-wheel";
     showScreen("wheelGame");
-    games["spin-wheel"].start({});
+    renderWheelWinners();
+    games["spin-wheel"].start({ customerCategory: wheelCustomerCategory });
+  }
+
+  function renderWheelWinners() {
+    const list = $("#wheelWinnersList");
+    if (!list) return;
+    const log = storage.getPrizeLog();
+    list.innerHTML = "";
+    if (!log.length) {
+      const empty = document.createElement("li");
+      empty.className = "winners-empty";
+      empty.textContent = "No prizes claimed yet — be the first!";
+      list.appendChild(empty);
+      return;
+    }
+    log.forEach(entry => {
+      const item = document.createElement("li");
+      const icon = document.createElement("img");
+      icon.src = entry.icon || "assets/prize-tshirt.svg";
+      icon.alt = "";
+      const info = document.createElement("div");
+      const name = document.createElement("strong");
+      name.textContent = entry.playerName;
+      const prize = document.createElement("small");
+      prize.textContent = entry.prizeLabel;
+      info.append(name, prize);
+      const time = document.createElement("span");
+      time.textContent = new Date(entry.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      item.append(icon, info, time);
+      list.appendChild(item);
+    });
   }
 
   async function finishWheel(result) {
     activeGameId = "spin-wheel";
+    wheelSpinCount += 1;
     const recorded = await storage.recordScore(currentPlayer.id, "spin-wheel", result.value, { difficulty: "standard", bestCombo: 1 });
     currentPlayer = recorded.player;
     updatePlayerUI();
+    if (result.won) {
+      storage.recordPrizeWin({ playerId: currentPlayer.id, playerName: currentPlayer.name, prizeId: result.id, prizeLabel: result.label, icon: result.icon, customerCategory: result.customerCategory });
+      renderWheelWinners();
+    }
     const image = $("#wheelPrizeImage");
     const glyph = $("#wheelPrizeGlyph");
+    const canSpinAgain = !result.won && wheelSpinCount < 2;
+    $("#wheelSpinAgainButton").style.display = canSpinAgain ? "" : "none";
     if (result.won) {
       $("#wheelResultLabel").textContent = "PRIZE UNLOCKED";
       $("#wheelResultTitle").textContent = `You won a ${result.label}!`;
@@ -354,12 +404,20 @@
       image.style.display = "";
       glyph.style.display = "none";
       $("#wheelPrizeArt").classList.add("winner");
-    } else {
-      $("#wheelResultLabel").textContent = result.id === "almost" ? "SO CLOSE" : "NOT THIS TIME";
-      $("#wheelResultTitle").textContent = result.id === "almost" ? "Almost! Inches away." : "Try again!";
-      $("#wheelResultCopy").textContent = "The wheel says not yet — give it another spin and chase that merch.";
+    } else if (canSpinAgain) {
+      $("#wheelResultLabel").textContent = "TRY AGAIN";
+      $("#wheelResultTitle").textContent = "One more spin unlocked!";
+      $("#wheelResultCopy").textContent = "The wheel landed on TRY AGAIN — you get one final spin. Make it count.";
       image.style.display = "none";
-      glyph.textContent = result.id === "almost" ? "◎" : "↻";
+      glyph.textContent = "↻";
+      glyph.style.display = "";
+      $("#wheelPrizeArt").classList.remove("winner");
+    } else {
+      $("#wheelResultLabel").textContent = "GAME OVER";
+      $("#wheelResultTitle").textContent = "No win this time.";
+      $("#wheelResultCopy").textContent = "That was your final spin — thanks for playing! Head back to the arcade and take on the other challenges.";
+      image.style.display = "none";
+      glyph.textContent = "◎";
       glyph.style.display = "";
       $("#wheelPrizeArt").classList.remove("winner");
     }
@@ -442,7 +500,7 @@
     } else summaryContainer.append(...summaryCards);
     const list = $("#postLeaderboardList");
     list.innerHTML = "";
-    const topEntries = ranked.slice(0, 10);
+    const topEntries = ranked;
     topEntries.forEach((entry, index) => appendPostLeaderboardRow(list, entry, index + 1, gameId, participantIds));
     const missing = summary.players.filter(player => !topEntries.some(entry => entry.player.id === player.id));
     if (missing.length) {
@@ -507,6 +565,9 @@
     $("#soundSetting").checked = !!settings.sound;
     $("#durationSetting").value = String(settings.duration);
     $("#idleSetting").value = String(settings.idleSeconds);
+    $$(".rarity-setting").forEach(select => { select.value = settings.prizeRarity?.[select.dataset.prize] || "common"; });
+    $$(".new-customer-rarity-setting").forEach(select => { select.value = settings.newCustomerPrizeRarity?.[select.dataset.prize] || "ultra-rare"; });
+    $$(".daily-limit-setting").forEach(input => { input.value = settings.prizeDailyLimits?.[input.dataset.prize] ?? ""; });
   }
 
   function resetIdleTimer() {
@@ -544,7 +605,7 @@
   $$('[data-play="world-tour"]').forEach(button => button.addEventListener("click", () => beginGame("world-tour")));
   $$('[data-play="trophy-rush"]').forEach(button => button.addEventListener("click", () => beginGame("trophy-rush")));
   $$('[data-play="showdown"]').forEach(button => button.addEventListener("click", beginShowdown));
-  $$('[data-play="spin-wheel"]').forEach(button => button.addEventListener("click", () => beginGame("spin-wheel")));
+  $$('[data-play="spin-wheel"]').forEach(button => button.addEventListener("click", () => { resetWheelCategoryPicker(); beginGame("spin-wheel"); }));
   $$('[data-action="player-menu"]').forEach(button => button.addEventListener("click", () => currentPlayer ? showToast(`Playing as ${currentPlayer.name}`) : openModal("registrationModal")));
   $$('[data-action="leaderboard"]').forEach(button => button.addEventListener("click", async () => {
     $("#registrationModal").dataset.intent = "";
@@ -626,11 +687,24 @@
   $("#startWorldTour").addEventListener("click", () => startCountdown("world-tour"));
   $("#startTrophyRush").addEventListener("click", () => startCountdown("trophy-rush"));
   $("#startShowdown").addEventListener("click", () => startCountdown("showdown"));
-  $("#startSpinWheel").addEventListener("click", startSpinWheel);
+  $$("[data-wheel-customer]").forEach(button => button.addEventListener("click", () => {
+    wheelCustomerCategory = button.dataset.wheelCustomer;
+    $$("[data-wheel-customer]").forEach(item => item.classList.toggle("selected", item === button));
+  }));
+  $("#startSpinWheel").addEventListener("click", () => { wheelSpinCount = 0; startSpinWheel(); });
   $$('[data-action="wheel-spin-again"]').forEach(button => button.addEventListener("click", startSpinWheel));
   $$('[data-action="showdown-rematch"]').forEach(button => button.addEventListener("click", () => openModal("showdownInstructionsModal")));
   $("#saveSettings").addEventListener("click", () => {
-    settings = storage.saveSettings({ sound: $("#soundSetting").checked, duration: Number($("#durationSetting").value), idleSeconds: Number($("#idleSetting").value) });
+    const prizeRarity = {};
+    const newCustomerPrizeRarity = {};
+    const prizeDailyLimits = {};
+    $$(".rarity-setting").forEach(select => { prizeRarity[select.dataset.prize] = select.value; });
+    $$(".new-customer-rarity-setting").forEach(select => { newCustomerPrizeRarity[select.dataset.prize] = select.value; });
+    $$(".daily-limit-setting").forEach(input => {
+      const value = input.value.trim();
+      prizeDailyLimits[input.dataset.prize] = value === "" ? "" : Math.max(0, Math.floor(Number(value) || 0));
+    });
+    settings = storage.saveSettings({ sound: $("#soundSetting").checked, duration: Number($("#durationSetting").value), idleSeconds: Number($("#idleSetting").value), prizeRarity, newCustomerPrizeRarity, prizeDailyLimits });
     closeAllModals();
     resetIdleTimer();
     showToast("Settings saved");

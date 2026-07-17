@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0d2e13">
   <title>GAME IKO ON Arcade</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=6">
 </head>
 <body>
   <div id="app" class="app-shell">
@@ -50,7 +50,8 @@
           <div class="trophy">
             <img src="assets/fifa-world-cup-trophy-transparent.png" alt="FIFA World Cup trophy">
           </div>
-          <img class="portal-brand mpesa" src="assets/mpesa-logo.svg" alt="">
+          <img class="portal-brand mpesa" src="assets/mpesa-logo.svg" alt="">-
+
           <img class="portal-brand visa" src="assets/visa-logo.svg" alt="">
           <div class="football"><img src="assets/football-branded.png" alt=""></div>
           <div class="portal-shadow"></div>
@@ -306,28 +307,33 @@
           <div class="wheel-hud-tag"><small>PRIZE WHEEL</small><strong>GOOD LUCK</strong></div>
         </div>
         <div id="wheelArena" class="wheel-arena">
-          <div class="wheel-brand-strip strip-left" aria-hidden="true">
-            <img class="strip-mpesa" src="assets/mpesa-logo.svg" alt="">
-            <img class="strip-trophy" src="assets/fifa-world-cup-trophy-transparent.png" alt="">
-            <img class="strip-visa" src="assets/visa-logo.svg" alt="">
+          <div class="wheel-main">
+            <div class="wheel-stage">
+              <div id="wheelPointer" class="wheel-pointer" aria-hidden="true"></div>
+              <svg id="prizeWheel" class="prize-wheel" viewBox="0 0 200 200" role="img" aria-label="Prize wheel with tote bag, water bottle, phone charger, jersey, branded t-shirt and bucket hat wedges"></svg>
+              <div class="wheel-hub" aria-hidden="true"><span><i></i>N</span></div>
+            </div>
           </div>
-          <div class="wheel-brand-strip strip-right" aria-hidden="true">
-            <img class="strip-mpesa" src="assets/mpesa-logo.svg" alt="">
-            <img class="strip-trophy" src="assets/fifa-world-cup-trophy-transparent.png" alt="">
-            <img class="strip-visa" src="assets/visa-logo.svg" alt="">
-          </div>
-          <div class="wheel-stage">
-            <div id="wheelPointer" class="wheel-pointer" aria-hidden="true"></div>
-            <svg id="prizeWheel" class="prize-wheel" viewBox="0 0 200 200" role="img" aria-label="Prize wheel with tote bag, water bottle, jersey and bucket hat wedges"></svg>
-            <div class="wheel-hub" aria-hidden="true"><span><i></i>N</span></div>
-          </div>
-          <p id="wheelStatus" class="wheel-status" aria-live="polite">One spin. Six wedges. Make it count.</p>
-          <button id="spinWheelButton" class="spin-button" type="button">SPIN THE WHEEL</button>
-          <div class="wheel-prize-strip" aria-hidden="true">
-            <span><img src="assets/prize-tote-bag.svg" alt="">TOTE BAG</span>
-            <span><img src="assets/prize-water-bottle.svg" alt="">WATER BOTTLE</span>
-            <span><img src="assets/prize-jersey.svg" alt="">JERSEY</span>
-            <span><img src="assets/prize-bucket-hat.svg" alt="">BUCKET HAT</span>
+          <div class="wheel-side-panel">
+            <div class="wheel-side-logos" aria-hidden="true">
+              <img class="strip-mpesa" src="assets/mpesa-logo.svg" alt="">
+              <img class="strip-visa" src="assets/visa-logo.svg" alt="">
+            </div>
+            <p id="wheelStatus" class="wheel-status" aria-live="polite">Land a prize to win. TRY AGAIN earns one extra spin.</p>
+            <button id="spinWheelButton" class="spin-button" type="button">SPIN THE WHEEL</button>
+            <div class="wheel-prize-strip" aria-hidden="true">
+              <span><img src="assets/prize-tote-bag.svg" alt="">TOTE BAG</span>
+              <span><img src="assets/prize-water-bottle.svg" alt="">WATER BOTTLE</span>
+              <span><img src="assets/prize-phone-charger.svg" alt="">PHONE CHARGER</span>
+              <span><img src="assets/prize-jersey.svg" alt="">JERSEY</span>
+              <span><img src="assets/prize-tshirt.svg" alt="">T-SHIRT</span>
+              <span><img src="assets/prize-bucket-hat.svg" alt="">BUCKET HAT</span>
+            </div>
+            <aside id="wheelWinnersBoard" class="wheel-winners-board" aria-label="Recent prize winners">
+              <p class="eyebrow">PRIZE BOARD</p>
+              <h3>WHO WON WHAT</h3>
+              <ul id="wheelWinnersList"></ul>
+            </aside>
           </div>
         </div>
       </section>
@@ -443,9 +449,16 @@
       <h2 id="wheelInstructionsTitle">How to play</h2>
       <div class="instruction-grid">
         <div class="instruction-step"><span class="step-icon">◉</span><strong>One tap to spin</strong><p>Hit the button and let the wheel decide.</p></div>
-        <div class="instruction-step"><span class="step-icon">🎁</span><strong>Win real merch</strong><p>Tote bag, water bottle, jersey or bucket hat.</p></div>
-        <div class="instruction-step"><span class="step-icon">↻</span><strong>Miss a wedge?</strong><p>Try Again and Almost mean another chance.</p></div>
+        <div class="instruction-step"><span class="step-icon">🎁</span><strong>Win real merch</strong><p>Tote bag, water bottle, jersey, branded t-shirt or bucket hat.</p></div>
+        <div class="instruction-step"><span class="step-icon">↻</span><strong>Land TRY AGAIN?</strong><p>You get one extra spin — two spins max per player.</p></div>
         <div class="instruction-step"><span class="step-icon">🏷</span><strong>Claim your prize</strong><p>Show the win screen at the GAME IKO <i></i>N desk.</p></div>
+      </div>
+      <div class="wheel-customer-picker" aria-label="Customer category">
+        <p class="eyebrow">CUSTOMER CATEGORY</p>
+        <div>
+          <button type="button" data-wheel-customer="new"><strong>New customer</strong></button>
+          <button type="button" data-wheel-customer="existing"><strong>Existing customer</strong></button>
+        </div>
       </div>
       <button id="startSpinWheel" class="primary-button full-button" type="button">Take your spin <span>→</span></button>
     </section>
@@ -463,8 +476,22 @@
       <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
       <p class="eyebrow">EVENT CONTROLS</p><h2 id="settingsTitle">Settings</h2>
       <div class="setting-row"><div><strong>Sound effects</strong><small>Game feedback and stadium sounds</small></div><label class="switch"><input id="soundSetting" type="checkbox" checked><span></span></label></div>
-      <div class="setting-row"><div><strong>Round duration</strong><small>Golden Goal play time</small></div><select id="durationSetting"><option value="30">30 seconds</option><option value="45" selected>45 seconds</option><option value="60">60 seconds</option></select></div>
-      <div class="setting-row"><div><strong>Idle attract mode</strong><small>Return home after inactivity</small></div><select id="idleSetting"><option value="60">1 minute</option><option value="120" selected>2 minutes</option><option value="300">5 minutes</option></select></div>
+      <div class="setting-row"><div><strong>Round duration</strong><small>Golden Goal play time</small></div><select id="durationSetting"><option value="30" selected>30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select></div>
+      <div class="setting-row"><div><strong>Idle attract mode</strong><small>Return home after inactivity</small></div><select id="idleSetting"><option value="60" selected>1 minute</option><option value="120">2 minutes</option><option value="300">5 minutes</option></select></div>
+      <p class="eyebrow settings-subhead">SPIN &amp; WIN — PRIZE RARITY</p>
+      <div class="setting-row"><div><strong>Tote bag</strong><small>Chance and daily stock</small></div><div class="prize-setting-controls"><select class="rarity-setting" data-prize="tote-bag"><option value="common">Common (~1 in 5)</option><option value="rare">Rare (~1 in 10)</option><option value="very-rare">Very rare (~1 in 20)</option><option value="ultra-rare">Ultra rare (~1 in 50)</option><option value="none">Out of stock (never)</option></select><input class="daily-limit-setting" data-prize="tote-bag" type="number" min="0" step="1" inputmode="numeric" placeholder="Daily"></div></div>
+      <div class="setting-row"><div><strong>Water bottle</strong><small>Chance and daily stock</small></div><div class="prize-setting-controls"><select class="rarity-setting" data-prize="water-bottle"><option value="common">Common (~1 in 5)</option><option value="rare">Rare (~1 in 10)</option><option value="very-rare">Very rare (~1 in 20)</option><option value="ultra-rare">Ultra rare (~1 in 50)</option><option value="none">Out of stock (never)</option></select><input class="daily-limit-setting" data-prize="water-bottle" type="number" min="0" step="1" inputmode="numeric" placeholder="Daily"></div></div>
+      <div class="setting-row"><div><strong>Phone charger</strong><small>Chance and daily stock</small></div><div class="prize-setting-controls"><select class="rarity-setting" data-prize="phone-charger"><option value="common">Common (~1 in 5)</option><option value="rare">Rare (~1 in 10)</option><option value="very-rare">Very rare (~1 in 20)</option><option value="ultra-rare">Ultra rare (~1 in 50)</option><option value="none">Out of stock (never)</option></select><input class="daily-limit-setting" data-prize="phone-charger" type="number" min="0" step="1" inputmode="numeric" placeholder="Daily"></div></div>
+      <div class="setting-row"><div><strong>Jersey</strong><small>Chance and daily stock</small></div><div class="prize-setting-controls"><select class="rarity-setting" data-prize="jersey"><option value="common">Common (~1 in 5)</option><option value="rare">Rare (~1 in 10)</option><option value="very-rare">Very rare (~1 in 20)</option><option value="ultra-rare">Ultra rare (~1 in 50)</option><option value="none">Out of stock (never)</option></select><input class="daily-limit-setting" data-prize="jersey" type="number" min="0" step="1" inputmode="numeric" placeholder="Daily"></div></div>
+      <div class="setting-row"><div><strong>Bucket hat</strong><small>Chance and daily stock</small></div><div class="prize-setting-controls"><select class="rarity-setting" data-prize="bucket-hat"><option value="common">Common (~1 in 5)</option><option value="rare">Rare (~1 in 10)</option><option value="very-rare">Very rare (~1 in 20)</option><option value="ultra-rare">Ultra rare (~1 in 50)</option><option value="none">Out of stock (never)</option></select><input class="daily-limit-setting" data-prize="bucket-hat" type="number" min="0" step="1" inputmode="numeric" placeholder="Daily"></div></div>
+      <div class="setting-row"><div><strong>Branded T-shirt</strong><small>Chance and daily stock</small></div><div class="prize-setting-controls"><select class="rarity-setting" data-prize="tshirt"><option value="common">Common (~1 in 5)</option><option value="rare">Rare (~1 in 10)</option><option value="very-rare">Very rare (~1 in 20)</option><option value="ultra-rare">Ultra rare (~1 in 50)</option><option value="none">Out of stock (never)</option></select><input class="daily-limit-setting" data-prize="tshirt" type="number" min="0" step="1" inputmode="numeric" placeholder="Daily"></div></div>
+      <p class="eyebrow settings-subhead">NEW CUSTOMER PRIZE RARITY</p>
+      <div class="setting-row"><div><strong>Tote bag</strong><small>New customer chance only</small></div><select class="new-customer-rarity-setting" data-prize="tote-bag"><option value="common">Common (~1 in 5)</option><option value="rare">Rare (~1 in 10)</option><option value="very-rare">Very rare (~1 in 20)</option><option value="ultra-rare" selected>Ultra rare (~1 in 50)</option><option value="none">No wins</option></select></div>
+      <div class="setting-row"><div><strong>Water bottle</strong><small>New customer chance only</small></div><select class="new-customer-rarity-setting" data-prize="water-bottle"><option value="common">Common (~1 in 5)</option><option value="rare">Rare (~1 in 10)</option><option value="very-rare">Very rare (~1 in 20)</option><option value="ultra-rare" selected>Ultra rare (~1 in 50)</option><option value="none">No wins</option></select></div>
+      <div class="setting-row"><div><strong>Phone charger</strong><small>New customer chance only</small></div><select class="new-customer-rarity-setting" data-prize="phone-charger"><option value="common">Common (~1 in 5)</option><option value="rare">Rare (~1 in 10)</option><option value="very-rare">Very rare (~1 in 20)</option><option value="ultra-rare" selected>Ultra rare (~1 in 50)</option><option value="none">No wins</option></select></div>
+      <div class="setting-row"><div><strong>Jersey</strong><small>New customer chance only</small></div><select class="new-customer-rarity-setting" data-prize="jersey"><option value="common">Common (~1 in 5)</option><option value="rare">Rare (~1 in 10)</option><option value="very-rare">Very rare (~1 in 20)</option><option value="ultra-rare" selected>Ultra rare (~1 in 50)</option><option value="none">No wins</option></select></div>
+      <div class="setting-row"><div><strong>Bucket hat</strong><small>New customer chance only</small></div><select class="new-customer-rarity-setting" data-prize="bucket-hat"><option value="common">Common (~1 in 5)</option><option value="rare">Rare (~1 in 10)</option><option value="very-rare">Very rare (~1 in 20)</option><option value="ultra-rare" selected>Ultra rare (~1 in 50)</option><option value="none">No wins</option></select></div>
+      <div class="setting-row"><div><strong>Branded T-shirt</strong><small>New customer chance only</small></div><select class="new-customer-rarity-setting" data-prize="tshirt"><option value="common">Common (~1 in 5)</option><option value="rare">Rare (~1 in 10)</option><option value="very-rare">Very rare (~1 in 20)</option><option value="ultra-rare" selected>Ultra rare (~1 in 50)</option><option value="none">No wins</option></select></div>
       <button id="saveSettings" class="primary-button full-button" type="button">Save settings</button>
       <button id="resetDataButton" class="danger-button" type="button">Reset all player data</button>
     </section>
@@ -508,7 +535,7 @@
       <p id="wheelResultCopy" class="modal-copy"></p>
       <div class="modal-actions">
         <button class="secondary-button" type="button" data-action="result-home">Arcade home</button>
-        <button class="primary-button" type="button" data-action="wheel-spin-again">Spin again</button>
+        <button id="wheelSpinAgainButton" class="primary-button" type="button" data-action="wheel-spin-again">Spin again</button>
       </div>
     </section>
 
@@ -527,12 +554,12 @@
     <div id="toast" class="toast" role="status"></div>
   </div>
 
-  <script src="js/storage.js"></script>
-  <script src="js/games/golden-goal.js"></script>
-  <script src="js/games/world-tour.js"></script>
-  <script src="js/games/trophy-rush.js"></script>
-  <script src="js/games/showdown.js"></script>
-  <script src="js/games/spin-wheel.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/storage.js?v=6"></script>
+  <script src="js/games/golden-goal.js?v=3"></script>
+  <script src="js/games/world-tour.js?v=3"></script>
+  <script src="js/games/trophy-rush.js?v=3"></script>
+  <script src="js/games/showdown.js?v=3"></script>
+  <script src="js/games/spin-wheel.js?v=8"></script>
+  <script src="js/app.js?v=6"></script>
 </body>
 </html>

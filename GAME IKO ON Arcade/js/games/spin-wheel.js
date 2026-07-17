@@ -3,16 +3,26 @@
 
   const SVG_NS = "http://www.w3.org/2000/svg";
   const RADIANS = Math.PI / 180;
-  const SEGMENT_ANGLE = 60;
+
+  const RARITY_WEIGHTS = { "common": 1, "rare": .5, "very-rare": .25, "ultra-rare": .1, "none": 0 };
+  const CUSTOMER_PRIZE_MULTIPLIERS = { "existing": 2.5 };
 
   const segments = [
     { id: "tote-bag", label: ["TOTE", "BAG"], name: "TOTE BAG", type: "prize", icon: "assets/prize-tote-bag.svg", color: "#3bb44a", value: 500, weight: 1 },
-    { id: "try-again", label: ["TRY", "AGAIN"], name: "TRY AGAIN", type: "miss", color: "#1434cb", value: 0, weight: 1.3 },
-    { id: "jersey", label: ["JERSEY"], name: "JERSEY", type: "prize", icon: "assets/prize-jersey.svg", color: "#3bb44a", value: 800, weight: .7 },
-    { id: "almost", label: ["ALMOST"], name: "ALMOST", type: "miss", color: "#1434cb", value: 0, weight: 1.3 },
-    { id: "water-bottle", label: ["WATER", "BOTTLE"], name: "WATER BOTTLE", type: "prize", icon: "assets/prize-water-bottle.svg", color: "#3bb44a", value: 400, weight: 1 },
-    { id: "bucket-hat", label: ["BUCKET", "HAT"], name: "BUCKET HAT", type: "prize", icon: "assets/prize-bucket-hat.svg", color: "#1434cb", value: 600, weight: .85 }
+    { id: "try-again", label: ["TRY", "AGAIN"], name: "TRY AGAIN", type: "miss", color: "#1434cb", value: 0, weight: .65 },
+    { id: "jersey", label: ["JERSEY"], name: "JERSEY", type: "prize", icon: "assets/prize-jersey.svg", color: "#3bb44a", value: 800, weight: .25 },
+    { id: "try-again", label: ["TRY", "AGAIN"], name: "TRY AGAIN", type: "miss", color: "#1434cb", value: 0, weight: .65 },
+    { id: "water-bottle", label: ["WATER", "BOTTLE"], name: "WATER BOTTLE", type: "prize", icon: "assets/prize-water-bottle.svg", color: "#3bb44a", value: 400, weight: .25 },
+    { id: "try-again", label: ["TRY", "AGAIN"], name: "TRY AGAIN", type: "miss", color: "#1434cb", value: 0, weight: .65 },
+    { id: "phone-charger", label: ["PHONE", "CHARGER"], name: "PHONE CHARGER", type: "prize", icon: "assets/prize-phone-charger.svg", color: "#3bb44a", value: 550, weight: .25 },
+    { id: "try-again", label: ["TRY", "AGAIN"], name: "TRY AGAIN", type: "miss", color: "#1434cb", value: 0, weight: .65 },
+    { id: "bucket-hat", label: ["BUCKET", "HAT"], name: "BUCKET HAT", type: "prize", icon: "assets/prize-bucket-hat.svg", color: "#3bb44a", value: 600, weight: 1 },
+    { id: "try-again", label: ["TRY", "AGAIN"], name: "TRY AGAIN", type: "miss", color: "#1434cb", value: 0, weight: .65 },
+    { id: "tshirt", label: ["T-SHIRT"], name: "BRANDED T-SHIRT", type: "prize", icon: "assets/prize-tshirt.svg", color: "#3bb44a", value: 700, weight: .25 },
+    { id: "try-again", label: ["TRY", "AGAIN"], name: "TRY AGAIN", type: "miss", color: "#1434cb", value: 0, weight: .65 }
   ];
+
+  const SEGMENT_ANGLE = 360 / segments.length;
 
   const rimPoint = (radius, angle) => ({ x: 100 + radius * Math.sin(angle * RADIANS), y: 100 - radius * Math.cos(angle * RADIANS) });
 
@@ -22,6 +32,7 @@
       this.callbacks = callbacks;
       this.state = null;
       this.rotation = 0;
+      this.customerCategory = "new";
       this.animationFrame = null;
       this.timers = new Set();
       this.buildWheel();
@@ -66,8 +77,8 @@
         if (segment.icon) {
           const icon = document.createElementNS(SVG_NS, "image");
           icon.setAttribute("href", segment.icon);
-          icon.setAttribute("x", "85"); icon.setAttribute("y", "44");
-          icon.setAttribute("width", "30"); icon.setAttribute("height", "30");
+          icon.setAttribute("x", "87"); icon.setAttribute("y", "46");
+          icon.setAttribute("width", "26"); icon.setAttribute("height", "26");
           icon.setAttribute("transform", `rotate(${middle} 100 100)`);
           group.appendChild(icon);
         } else {
@@ -76,7 +87,7 @@
           glyph.setAttribute("class", "wheel-seg-glyph");
           glyph.setAttribute("text-anchor", "middle");
           glyph.setAttribute("transform", `rotate(${middle} 100 100)`);
-          glyph.textContent = segment.id === "almost" ? "◎" : "↻";
+          glyph.textContent = "↻";
           group.appendChild(glyph);
         }
         this.rotor.appendChild(group);
@@ -92,23 +103,45 @@
       }
     }
 
-    start() {
+    start(options = {}) {
       this.stop();
+      this.customerCategory = options.customerCategory === "existing" ? "existing" : "new";
       this.state = { running: true, paused: false, spinning: false, resultIndex: null };
       this.wedges.forEach(wedge => wedge.classList.remove("won"));
       this.el.wheel.classList.remove("spinning");
       this.el.spinButton.disabled = false;
-      this.el.status.textContent = "One spin. Six wedges. Make it count.";
+      this.el.status.textContent = "Land a prize to win. TRY AGAIN earns one extra spin.";
+    }
+
+    segmentWeights() {
+      const settings = window.GameIkoStorage?.getSettings() || {};
+      const rarity = this.customerCategory === "new"
+        ? settings.newCustomerPrizeRarity || {}
+        : settings.prizeRarity || {};
+      const dailyLimits = settings.prizeDailyLimits || {};
+      const dailyCounts = window.GameIkoStorage?.getDailyPrizeCounts?.() || {};
+      return segments.map(segment => {
+        if (segment.type !== "prize") return segment.weight;
+        const dailyLimit = dailyLimits[segment.id] === "" || dailyLimits[segment.id] == null
+          ? Infinity
+          : Number(dailyLimits[segment.id]);
+        if (Number.isFinite(dailyLimit) && (dailyCounts[segment.id] || 0) >= Math.max(0, dailyLimit)) return 0;
+        if (rarity[segment.id] === "none") return 0;
+        const weight = RARITY_WEIGHTS[rarity[segment.id]];
+        const baseWeight = typeof weight === "number" ? weight : segment.weight;
+        return baseWeight * (CUSTOMER_PRIZE_MULTIPLIERS[this.customerCategory] || 1);
+      });
     }
 
     pickSegmentIndex() {
-      const total = segments.reduce((sum, segment) => sum + segment.weight, 0);
+      const weights = this.segmentWeights();
+      const total = weights.reduce((sum, weight) => sum + weight, 0);
       let roll = Math.random() * total;
       for (let index = 0; index < segments.length; index++) {
-        roll -= segments[index].weight;
-        if (roll <= 0) return index;
+        roll -= weights[index];
+        if (roll <= 0 && weights[index] > 0) return index;
       }
-      return segments.length - 1;
+      return segments.findIndex(segment => segment.type === "miss");
     }
 
     spin() {
@@ -158,13 +191,14 @@
       this.wedges[this.state.resultIndex].classList.add("won");
       this.el.status.textContent = segment.type === "prize"
         ? `${segment.name}! What a spin!`
-        : segment.id === "almost" ? "ALMOST — inches away!" : "TRY AGAIN — the wheel owes you one.";
+        : "TRY AGAIN!";
       this.setTimer(() => {
         if (!this.state) return;
         this.state.running = false;
         this.callbacks.complete({
           id: segment.id, label: segment.name, icon: segment.icon || null,
-          value: segment.value, won: segment.type === "prize"
+          value: segment.value, won: segment.type === "prize",
+          customerCategory: this.customerCategory
         });
       }, 1500);
     }

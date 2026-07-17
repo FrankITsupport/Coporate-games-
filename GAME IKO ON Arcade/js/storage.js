@@ -5,6 +5,7 @@
   const DB_VERSION = 1;
   const PLAYER_STORE = "players";
   const SETTINGS_KEY = "game_iko_on_settings_v1";
+  const PRIZE_LOG_KEY = "game_iko_on_prize_log_v1";
 
   let dbPromise;
 
@@ -101,7 +102,30 @@
     return { player, previousBest: previous.bestScore || 0, isPersonalBest: numericScore > (previous.bestScore || 0) };
   }
 
+  function getPrizeLog() {
+    try { return JSON.parse(localStorage.getItem(PRIZE_LOG_KEY) || "[]"); }
+    catch (_) { return []; }
+  }
+
+  function recordPrizeWin(entry) {
+    const log = getPrizeLog();
+    log.unshift(Object.assign({ at: new Date().toISOString() }, entry));
+    localStorage.setItem(PRIZE_LOG_KEY, JSON.stringify(log.slice(0, 2000)));
+    return log[0];
+  }
+
+  function getDailyPrizeCounts(date = new Date()) {
+    const dayKey = date.toLocaleDateString("en-CA");
+    return getPrizeLog().reduce((counts, entry) => {
+      if (!entry.prizeId || !entry.at) return counts;
+      if (new Date(entry.at).toLocaleDateString("en-CA") !== dayKey) return counts;
+      counts[entry.prizeId] = (counts[entry.prizeId] || 0) + 1;
+      return counts;
+    }, {});
+  }
+
   async function resetAll() {
+    localStorage.removeItem(PRIZE_LOG_KEY);
     const db = await openDatabase();
     if (!db) {
       localStorage.removeItem("game_iko_on_players_fallback");
@@ -115,8 +139,20 @@
   }
 
   function getSettings() {
-    const defaults = { sound: true, duration: 45, idleSeconds: 120 };
-    try { return Object.assign(defaults, JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}")); }
+    const defaults = {
+      sound: true, duration: 30, idleSeconds: 60,
+      prizeRarity: { "tote-bag": "common", "water-bottle": "very-rare", "jersey": "very-rare", "phone-charger": "very-rare", "bucket-hat": "common", "tshirt": "very-rare" },
+      newCustomerPrizeRarity: { "tote-bag": "ultra-rare", "water-bottle": "ultra-rare", "jersey": "ultra-rare", "phone-charger": "ultra-rare", "bucket-hat": "ultra-rare", "tshirt": "ultra-rare" },
+      prizeDailyLimits: { "tote-bag": "", "water-bottle": "", "jersey": "", "phone-charger": "", "bucket-hat": "", "tshirt": "" }
+    };
+    try {
+      const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+      return Object.assign({}, defaults, saved, {
+        prizeRarity: Object.assign({}, defaults.prizeRarity, saved.prizeRarity),
+        newCustomerPrizeRarity: Object.assign({}, defaults.newCustomerPrizeRarity, saved.newCustomerPrizeRarity),
+        prizeDailyLimits: Object.assign({}, defaults.prizeDailyLimits, saved.prizeDailyLimits)
+      });
+    }
     catch (_) { return defaults; }
   }
 
@@ -125,5 +161,5 @@
     return settings;
   }
 
-  window.GameIkoStorage = { normalizeName, cleanName, getAllPlayers, createPlayer, putPlayer, recordScore, resetAll, getSettings, saveSettings };
+  window.GameIkoStorage = { normalizeName, cleanName, getAllPlayers, createPlayer, putPlayer, recordScore, resetAll, getSettings, saveSettings, getPrizeLog, getDailyPrizeCounts, recordPrizeWin };
 })();
